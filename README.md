@@ -24,4 +24,7 @@
 
 ## Operational flow
 > [!TIP]
-> An example of an operational flow is described as follows: The operational flow begins at the controller layer, which handles incoming requests. The service layer processes these requests, often requiring data interactions with the code repository layer. Once processing is complete, the service layer relays the outcomes to the controller, which then constructs a response.
+> An example of an operational flow is described as follows: The operational flow begins at the controller layer, which handles incoming requests. The service layer processes these requests, often requiring data interactions with the code repository layer. Once processing is complete, the service layer relays the outcomes to the controller, which then builds a response.
+
+## [Swagger](https://swagger.io/)
+<p align="justify">To alleviate the complexity of metamodel’s structures and enable model manipulation operations without a deep understanding of the underlying concepts, we rely on Swagger, a specification to document and present REST API endpoints.</p>
