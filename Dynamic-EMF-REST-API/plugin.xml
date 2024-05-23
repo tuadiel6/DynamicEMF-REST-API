@@ -11,7 +11,7 @@
       <package
             uri="http://emf-rest.com/Example"
             class="Example.ExamplePackage"
-            genModel="src/main/resources/model/Family.genmodel"/>
+            genModel="src/main/resources/MDERepository/Family.genmodel"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
@@ -19,7 +19,7 @@
       <package
             uri="http://example.publicationsystem/v1"
             class="PublicationSystem.PublicationSystemPackage"
-            genModel="src/main/resources/model/Publication.genmodel"/>
+            genModel="src/main/resources/MDERepository/Publication.genmodel"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
@@ -27,7 +27,7 @@
       <package
             uri="http://it.disim.univaq/architecturemodeling/v2"
             class="architecturemodeling.ArchitecturemodelingPackage"
-            genModel="src/main/resources/model/component.genmodel"/>
+            genModel="src/main/resources/MDERepository/component.genmodel"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
@@ -35,7 +35,7 @@
       <package
             uri="http://it.disim.univaq/architecturemodeling/v2"
             class="Architecturemodeling.ArchitecturemodelingPackage"
-            genModel="src/main/resources/model/ArchitectureModel.genmodel"/>
+            genModel="src/main/resources/MDERepository/ArchitectureModel.genmodel"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
@@ -43,7 +43,7 @@
       <package
             uri="http://it.gssi/architecture/v1"
             class="Architecture.ArchitecturePackage"
-            genModel="src/main/resources/model/ArchModel.genmodel"/>
+            genModel="src/main/resources/MDERepository/ArchModel.genmodel"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
@@ -51,7 +51,7 @@
       <package
             uri="http://it.gssi/modelArchitecture/v0"
             class="Modelarchitecture.ModelarchitecturePackage"
-            genModel="src/main/resources/model/ArchitectureTest.genmodel"/>
+            genModel="src/main/resources/MDERepository/ArchitectureTest.genmodel"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
@@ -59,7 +59,7 @@
       <package
             uri="http://it.gssi/workflow"
             class="Workflowlang.WorkflowlangPackage"
-            genModel="src/main/resources/model/Workflow.genmodel"/>
+            genModel="src/main/resources/MDERepository/Workflow.genmodel"/>
    </extension>
 
 </plugin>
