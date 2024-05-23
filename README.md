@@ -30,7 +30,7 @@
 <p align="justify">To alleviate the complexity of metamodel’s structures and enable model manipulation operations without a deep understanding of the underlying concepts, we rely on Swagger, a specification to document and present REST API endpoints.</p>
 
 ## Discovery component
-<p align="justify">The provisioning process is triggered whenever an update is introduced into the MDE Repository. Upon detecting a metamodel update, the process performs two steps: (1) updating the generator model (GenModel) and (2) generating the corresponding Java code. Once the GenModel is updated, the system regenerates the corresponding Java code, ensuring the new (or updated) metamodel is fully integrated into our middleware without the need to redeploy and restart the application.</p>
+<p align="justify">The provisioning process is launched whenever an update is introduced into the MDE Repository. Upon detecting a metamodel update, the process performs two steps: (1) updating the generator model (GenModel) and (2) generating the corresponding Java code. Once the GenModel is updated, the system regenerates the corresponding Java code, ensuring the new (or updated) metamodel is fully integrated into our middleware without the need to redeploy and restart the application.</p>
 
 > [!NOTE]
 > A GenModel is a configuration model used by EMF to generate Java code from metamodels that will be hosted in the code repository.
