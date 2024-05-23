@@ -23,15 +23,15 @@ The middleware has been developed using the [Spring Boot framework](https://spri
 ### (3) Controller Layer
 <p align="justify">This layer exposes the REST API endpoints, managing incoming requests, processing them, and formulating appropriate responses, thereby facilitating client interaction with the middleware.</p>
 
-#### Operational flow
+#### REST API Call Operational flow
 > [!TIP]
-> An example of an operational flow is described as follows: The operational flow begins at the controller layer, which handles incoming requests. The service layer processes these requests, often requiring data interactions with the code repository layer. Once processing is complete, the service layer relays the outcomes to the controller, which then builds a response.
-
-### [Swagger](https://swagger.io/)
-<p align="justify">To alleviate the complexity of metamodel’s structures and enable model manipulation operations without a deep understanding of the underlying concepts, we rely on Swagger, a specification to document and present REST API endpoints.</p>
+> When a REST API call is initiated, the operational flow proceeds as follows: The operational flow begins at the controller layer, which handles incoming requests. The service layer processes these requests, often requiring data interactions with the code repository layer. Once processing is complete, the service layer relays the outcomes to the controller, which then builds a response.
 
 ## (c) Discovery component
 <p align="justify">The provisioning process is launched whenever an update is introduced into the MDE Repository. Upon detecting a metamodel update, the process performs two steps: (1) updating the generator model (GenModel) and (2) generating the corresponding Java code. Once the GenModel is updated, the system regenerates the corresponding Java code, ensuring the new (or updated) metamodel is fully integrated into our middleware without the need to redeploy and restart the application.</p>
 
 > [!NOTE]
 > A GenModel is a configuration model used by EMF to generate Java code from metamodels that will be hosted in the code repository.
+
+### [Swagger](https://swagger.io/)
+<p align="justify">To alleviate the complexity of metamodel’s structures and enable model manipulation operations without a deep understanding of the underlying concepts, we rely on Swagger, a specification to document and present REST API endpoints.</p>
