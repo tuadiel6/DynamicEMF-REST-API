@@ -12,6 +12,7 @@
 ## Code Repository Layer
 
 <p align="justify">This layer is the primary gateway for data access within our system. It handles the retrieval, storage, and manipulation of data, encapsulating fundamental CRUD (Create, Read, Update, Delete) operations and translating them into model manipulation operations.</p>
+
 > [!NOTE]
 > It is important to note that this layer executes model operations in stateless mode, thus ensuring that each operation is self-contained and independent.
 
