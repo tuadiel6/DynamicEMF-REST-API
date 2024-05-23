@@ -5,5 +5,6 @@
 <div align="justify">Our approach consists of: (a) an MDE (Model-Driven Engineering) repository that stores model-based artifacts, primarily focusing on metamodels and their corresponding models, and (b) a middleware interface, which offers a REST API to access the models stored within the MDE repository.</div>
 
 > [!NOTE]
-> The middleware has been developped using the [Spring Boot framework](https://spring.io/projects/spring-boot), a component of the Spring ecosystem that simplifies application development by reducing manual configuration. Spring Boot simplifies service setup and deployment with an embedded server, facilitating the creation of microservices in our REST API middleware. In our approach, the middleware is responsible for enabling the interaction with the stored models.
+> The middleware has been developped using the [Spring Boot framework](https://spring.io/projects/spring-boot), a component of the Spring ecosystem that simplifies application development by reducing manual configuration.
+> Spring Boot simplifies service setup and deployment with an embedded server, facilitating the creation of microservices in our REST API middleware. In our approach, the middleware is responsible for enabling the interaction with the stored models.
 
