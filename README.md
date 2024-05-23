@@ -21,3 +21,7 @@
 
 ### (3) Controller Layer
 <p align="justify">This layer exposes the REST API endpoints, managing incoming requests, processing them, and formulating appropriate responses, thereby facilitating client interaction with the middleware.</p>
+
+## Operational flow
+> [!TIP]
+> An example of an operational flow is described as follows: The operational flow begins at the controller layer, which handles incoming requests. The service layer processes these requests, often requiring data interactions with the code repository layer. Once processing is complete, the service layer relays the outcomes to the controller, which then constructs a response.
