@@ -9,13 +9,14 @@
 
 <p align="justify">The implemented middleware follows a three-layer architecture, inspired by the Spring Boot framework, consisting of the code repository, service, and controller layers. Below, we describe the main responsibilities of each layer in our approach:</p>
 
-## Code Repository Layer
-
+## (1) Code Repository Layer
 <p align="justify">This layer is the primary gateway for data access within our system. It handles the retrieval, storage, and manipulation of data, encapsulating fundamental CRUD (Create, Read, Update, Delete) operations and translating them into model manipulation operations.</p>
 
 > [!NOTE]
 > It is important to note that this layer executes model operations in stateless mode, thus ensuring that each operation is self-contained and independent.
 
-## Service Layer
+## (2) Service Layer
+<p align="justify">This layer acts as an intermediary between the Repository and Controller layers, encapsulating the application's core business logic. It processes model data to be provided as a REST service. This layer also includes a Model Validator, which checks whether the model adheres to the metamodel's formal specification and constraints, ensuring it is suitable for further manipulation.</p>
 
-## Controller Layer
+## (3) Controller Layer
+<p align="justify">This layer exposes the REST API endpoints, managing incoming requests, processing them, and formulating appropriate responses, thereby facilitating client interaction with the middleware.</p>
