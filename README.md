@@ -6,5 +6,5 @@
 
 <div align="justify">
 > [!NOTE]
-> The middleware has been developed using the [Spring Boot framework](https://spring.io/projects/spring-boot), a component of the Spring ecosystem that simplifies application development by reducing manual configuration. Spring Boot simplifies service setup and deployment with an embedded server, facilitating the creation of microservices in our REST API middleware. In our approach, the middleware is responsible for enabling the interaction with the stored models.
-</div>
+> <div align="justify">The middleware has been developed using the [Spring Boot framework](https://spring.io/projects/spring-boot), a component of the Spring ecosystem that simplifies application development by reducing manual configuration. Spring Boot simplifies service setup and deployment with an embedded server, facilitating the creation of microservices in our REST API middleware. In our approach, the middleware is responsible for enabling the interaction with the stored models.</div>
+
