@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<architecturemodeling:ArchitectureModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:architecturemodeling="http://it.disim.univaq/architecturemodeling/v2" name="IoT" author="Amazon AWS">
+  <architectureelements xsi:type="architecturemodeling:Component" name="Critical IoT Devices" outgoing="//@architectureelements.8"/>
+  <architectureelements xsi:type="architecturemodeling:Component" name="IoT Devices" outgoing="//@architectureelements.9"/>
+  <architectureelements xsi:type="architecturemodeling:Component" name="Greengrass Component" outgoing="//@architectureelements.10" incoming="//@architectureelements.13 //@architectureelements.8" id="2"/>
+  <architectureelements xsi:type="architecturemodeling:Component" name="Greengrass Message Broker" outgoing="//@architectureelements.12" incoming="//@architectureelements.9" id="3"/>
+  <architectureelements xsi:type="architecturemodeling:Component" name="Greengrass  Stream Manager" outgoing="//@architectureelements.11" incoming="//@architectureelements.10" id="4"/>
+  <architectureelements xsi:type="architecturemodeling:Component" name="Greengrass Nucleus" outgoing="//@architectureelements.14 //@architectureelements.13" incoming="//@architectureelements.12" id="5"/>
+  <architectureelements xsi:type="architecturemodeling:Component" name="AWS IoT Core" outgoing="//@architectureelements.15" incoming="//@architectureelements.14" id="6"/>
+  <architectureelements xsi:type="architecturemodeling:Component" name="Amazon Kinesis Data Streams" incoming="//@architectureelements.15 //@architectureelements.11" id="7"/>
+  <architectureelements xsi:type="architecturemodeling:Connector" name="1,000 messages/sec" source="//@architectureelements.0" target="//@architectureelements.2"/>
+  <architectureelements xsi:type="architecturemodeling:Connector" name="10 messages/sec" source="//@architectureelements.1" target="//@architectureelements.3"/>
+  <architectureelements xsi:type="architecturemodeling:Connector" name="Component_To_StreamManager" source="//@architectureelements.2" target="//@architectureelements.4"/>
+  <architectureelements xsi:type="architecturemodeling:Connector" name="StreamManager_To_KinesisDataStreams" source="//@architectureelements.4" target="//@architectureelements.7"/>
+  <architectureelements xsi:type="architecturemodeling:Connector" name="MessageBroker_To_Nucleus" source="//@architectureelements.3" target="//@architectureelements.5"/>
+  <architectureelements xsi:type="architecturemodeling:Connector" name="Nucleus_To_Component" source="//@architectureelements.5" target="//@architectureelements.2"/>
+  <architectureelements xsi:type="architecturemodeling:Connector" name="Nucleus_To_AWSIoTCore" source="//@architectureelements.5" target="//@architectureelements.6"/>
+  <architectureelements xsi:type="architecturemodeling:Connector" name="AWSIoTCore_To_KinesisDataStreams" source="//@architectureelements.6" target="//@architectureelements.7"/>
+</architecturemodeling:ArchitectureModel>

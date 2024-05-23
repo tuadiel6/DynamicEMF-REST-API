@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoJS Visualization</title>
+  <script src="https://unpkg.com/gojs/release/go-debug.js"></script>
+
+</head>
+ <style>
+body {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+	margin: 0;
+	}
+
+#myDiagramDiv {
+	width: 80%;
+	height: 600px;
+	border: 1px solid #ddd; /* Add border for visibility */
+	}
+</style>
+</head>
+<body>
+  <div id="myDiagramDiv" style="border: solid 1px blue; width: 1000px; height: 1000px;"></div>
+ 
+ 
+  <script>
+  var $ = go.GraphObject.make;
+  var myDiagram; // Declare myDiagram in a broader scope
+  myDiagram =
+				      new go.Diagram("myDiagramDiv",  //Diagram refers to its DIV HTML element by id
+				        { "undoManager.isEnabled": true//, "LinkDrawn": onLinkDrawn  Add LinkDrawn event handler
+				    	  });
+  
+  // when the document is modified, add a "*" to the title and enable the "Save" button
+  myDiagram.addDiagramListener("Modified", e => {
+	  console.log('Diagram Modified:', e.diagram.isModified);
+				    const button = document.getElementById("SaveButton");
+				    if (button) button.disabled = !myDiagram.isModified;
+				    const idx = document.title.indexOf("*");
+				    if (myDiagram.isModified) {
+				      if (idx < 0) document.title += "*";
+				    } else {
+				      if (idx >= 0) document.title = document.title.slice(0, idx);
+				    }
+				  });
+  		
+				// support double-clicking in the background to add a copy of this data as a node
+			  myDiagram.toolManager.clickCreatingTool.archetypeNodeData = {
+			    key: "Unit"
+			  };
+			
+			  // To simplify this code we define a function for creating a context menu button:
+			  function makeButton(text, action, visiblePredicate) {
+							    return $("ContextMenuButton",
+							      $(go.TextBlock, text),
+							      { click: action },
+							      // don't bother with binding GraphObject.visible if there's no predicate
+							      visiblePredicate ? new go.Binding("visible", "", (o, e) => o.diagram ? visiblePredicate(o, e) : false).ofObject() : {});
+							  }
+			 		 
+		//Context menu definition
+		  
+			const nodeMenu =  // context menu for each Node
+					$("ContextMenu",
+				        	makeButton("Copy", (e, obj) => e.diagram.commandHandler.copySelection()),
+				        	makeButton("Delete", (e, obj) => e.diagram.commandHandler.deleteSelection()),	
+				         	//makeButton("Create component", (e, obj) => createNewComponent()),  // Added update button
+				        	$(go.Shape, "LineH", { strokeWidth: 2, height: 1, stretch: go.GraphObject.Horizontal }),
+				        	makeButton("Update component", (e, obj) => updateComponent())  // Added update button
+				       		 //makeButton("Delete Components", (e, obj) => deleteComponents()),  // Added update button
+				       		//makeButton("Add left port",	  (e, obj) => addPort("left")),
+				       		//makeButton("Add right port", (e, obj) => addPort("right"))    
+				      	);
+			  const portSize = new go.Size(8, 8);
+   
+        // Define the node template
+      
+        myDiagram.nodeTemplate =
+			  $(go.Node, 'Spot',
+			    $(go.Panel, "Auto",
+			      $(go.Shape, 'Rectangle', { fill: 'lightblue', stroke: 'black', strokeWidth: 1, minSize: new go.Size(50, 50), contextMenu: nodeMenu }),
+			      new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
+			      $(go.TextBlock,
+			        { margin: 10, textAlign: "center", font: "bold 12px Segoe UI,sans-serif", wrap: go.TextBlock.WrapFit, width: 100, stroke: "#484848",editable: true },
+			        new go.Binding("text", "key"))
+			    ),
+    // Left port
+    $(go.Panel, "Auto",
+		      { alignment: new go.Spot(0, 0.5) },
+		      $(go.Shape, "Rectangle",
+		        {
+		          fill: "#66d6d1",
+		          desiredSize: new go.Size(8, 8),
+		          portId: "l", fromSpot: go.Spot.Left, toSpot: go.Spot.Left,
+		          fromLinkable: true, toLinkable: true, cursor: "pointer",
+		        }
+		      )
+		    ),
+    // Right port
+    $(go.Panel, "Auto",
+		      { alignment: new go.Spot(1, 0.5) },
+		      $(go.Shape, "Rectangle",
+		        {
+		          fill: "#fae3d7",
+		          desiredSize: new go.Size(8, 8),
+		          portId: "r", fromSpot: go.Spot.Right, toSpot: go.Spot.Right,
+		          fromLinkable: true, toLinkable: true, cursor: "pointer",
+		        }
+		      )
+		    )
+		  );
+        
+       
+        // Define the link template
+        /*
+        myDiagram.linkTemplate =
+          $(go.Link,
+            $(go.Shape, {stroke: "#2F4F4F", strokeWidth: 2}),
+            $(go.TextBlock,
+              { stroke: 'red', font: 'bold 12px sans-serif' },
+              new go.Binding('text', 'text'))
+          );
+	*/	
+	
+	 // Set the spacing between nodes
+    myDiagram.layout = $(go.LayeredDigraphLayout, {
+      columnSpacing: 20,
+      layerSpacing: 10
+    });
+	
+	
+	myDiagram.linkTemplate =
+        $(go.Link,  // defined below
+          {
+            routing: go.Link.AvoidsNodes,
+            corner: 4,
+            reshapable: true,
+            resegmentable: true,
+            relinkableFrom: true,
+            relinkableTo: true
+          },
+          new go.Binding("points").makeTwoWay(),
+          $(go.Shape, { stroke: "#2F4F4F", strokeWidth: 2 })
+        );
+	
+	myDiagram.model.linkFromPortIdProperty = "fromPort";
+	myDiagram.model.linkToPortIdProperty ="toPort"
+	
+	
+	
+		var linkDataArray = [];
+	
+	
+// Fetch data from the REST endpoint
+fetch('http://localhost:8080/Workflowlang/Node/node-red/all')
+  .then(response => {
+    if (!response.ok) {
+      // If not, parse the error message from the response body
+            return response.text().then(errorMessage => {
+                // Throw an error with the parsed error message
+                throw new Error(errorMessage);
+            });
+    }
+    return response.json();
+  })
+  .then(data => {
+    // Ensure that the data is an array and has the expected structure
+    if (Array.isArray(data) && data.length > 0) {
+      // Flatten the nested arrays
+      var flattenedData = data.flat();
+      var linkDataArray = [];
+      // Convert data to GoJS format
+      var nodeDataArray = flattenedData.map(function (item) {
+        return {
+          key: item.name,
+          incoming: item.incoming,
+          outgoing: item.outgoing,
+          id: item.id,
+          position: new go.Point(item.positionX, item.positionY),
+          // ... (add more properties as needed)
+        };
+      });
+
+      // Log nodeDataArray to check if it's correct
+      console.log('Node Data Array:', nodeDataArray);
+
+      // Iterate through nodes to create links based on outgoing data
+      for (var i = 0; i < nodeDataArray.length; i++) {
+        var outgoingPorts = nodeDataArray[i].outgoing;
+
+        // Log outgoingPorts to check if it's correct
+        console.log('Outgoing Ports for ' + nodeDataArray[i].key + ':', outgoingPorts);
+
+        // Create outgoing links if available
+        if (outgoingPorts) {
+          for (var k = 0; k < outgoingPorts.length; k++) {
+            // Find the target node based on the connector name
+            var targetNode = nodeDataArray.find(node => node.incoming.some(incoming => incoming.name === outgoingPorts[k].name));
+
+            // Log targetNode to check if it's correct
+            console.log('Target Node for ' + outgoingPorts[k].name + ' from ' + nodeDataArray[i].key + ' to ' + targetNode?.key + ':', targetNode);
+
+            if (targetNode) {
+              // Add the original node to the diagram
+              myDiagram.model.addNodeData(nodeDataArray[i]);
+
+              // Add the target node to the diagram
+              myDiagram.model.addNodeData(targetNode);
+
+              // Add link data with correct properties
+              linkDataArray.push({
+                from: nodeDataArray[i].key,
+                to: targetNode.key,
+                text: outgoingPorts[k].name,
+              });
+
+              console.log('From ' + nodeDataArray[i].key + ' to ' + targetNode.key + ' Connector name: ' + outgoingPorts[k].name);
+            } else {
+              console.warn('Target node is undefined for Connector name: ' + outgoingPorts[k].name);
+            }
+          }
+        }
+      }
+      
+      // Load the model
+	myDiagram.model = new go.GraphLinksModel(
+		nodeDataArray, linkDataArray, [{fromPort: "r", toPort: "l"}]); 
+    } else {
+      console.error('Invalid data structure:', data);
+    }
+  })
+  .catch(error => {
+    // Show an error pop-up window with the error message
+    window.alert(error.message);
+  });
+
+			        
+			        //=======EVENT LISTENER DELETE COMPONENT====================
+			        
+			     // Add event listener for node deletion
+			        myDiagram.addDiagramListener('SelectionDeleting', function (e) {
+			          // Check if the event involves nodes being deleted
+			          if (e.subject.first() instanceof go.Node) {
+			            // Iterate through the selected nodes and perform the delete operation
+			            e.subject.each(function (part) {
+			              if (part instanceof go.Node) {
+							                var nodeToDeleteData = part.data;
+							                var componentName = nodeToDeleteData.key;
+							                
+							                // Make an API call to delete the Component in your EMF model
+							                deleteNodeInModel(componentName)
+							                  .then(response => {
+							                	  console.log('Successfully deleted node:', componentName);
+							                	  console.log('Successfully deleted node:', response);
+							                	  
+							                	// Reload the page after successful update
+							                	  reloadPage(); 
+							                	
+							                	  // Check if there's a custom message in the response
+							                        if (response && response.customMessage) {
+							                            // Show a pop-up window with the custom message
+							                            window.alert(response.customMessage);
+							                        }
+							                 })
+							                  .catch(error => {
+							                	  console.error('Error deleting node:', error);
+							                	// Show an error pop-up window with the error message from the controller
+							                	window.alert(getErrorMessage(error));
+							                	
+							                  });
+							                 
+							              }
+			           				 });
+			         			 }
+			        		}); 
+			       
+			       
+			       	 						
+							// Function to make an API call to delete the node in your EMF model
+							function deleteNodeInModel(nodeKey) {
+							    var deleteEndpoint = 'http://localhost:8080/Architecturemodeling/Component/ArchitectureModel/deleteByAttribute?attributeName=name&attributeValue=' + nodeKey;
+							
+							    return fetch(deleteEndpoint, {
+							        method: 'DELETE',
+							    })
+							        .then(response => {
+							            if (!response.ok) {
+							            	console.error('The required feature must be set:', response.status);
+							                // Parse the response as JSON to get the error message
+							            	return response.text().then(error => Promise.reject(new Error(error)));
+							            }
+							            // Parse the response as JSON
+							            return response.text();
+							        })
+							        .catch(error => {
+							            console.error('Error:', error);  
+							 	      throw error;
+							            
+							        });
+							}
+									        	
+			        	
+				// Function to get the error message from the error object
+				  function getErrorMessage(error) {
+				      if (error && error.message) {
+				          return error.message;
+				      } else {
+				          return 'Unknown error occurred';
+				      }
+				  }
+			        	
+			        	
+			        	
+			       /* 	
+			        // Add event listener for node deletion
+			        myDiagram.addDiagramListener('SelectionDeleting', function (e) {
+			          // Check if the event involves nodes being deleted
+			          if (e.subject.first() instanceof go.Node) {
+			            // Iterate through the selected nodes and perform the delete operation
+			            e.subject.each(function (part) {
+			              if (part instanceof go.Node) {
+							                var nodeToDeleteData = part.data;
+							                var componentName = nodeToDeleteData.key;
+							                //var componentName = nodeToDeleteData.id;
+											
+							                // Make an API call to delete the Component in your EMF model
+							                deleteNodeInModel(componentName)
+							                  .then(response => console.log('Successfully deleted node:', response))
+							                  .catch(error => console.error('Error deleting node:', error));
+							                
+							              }
+			           				 });
+			         			 }
+			        		}); 
+			      } else {
+			        console.error('Invalid data structure:', data);
+			      		}
+			    })
+			    .catch(error => {
+			      console.error('Error:', error);
+			    });
+			   
+	 		 */
+	  
+			 // =============DELETE  COMPPONENT================= -->
+			/*
+			
+			
+			// Function to make an API call to delete the node in your EMF model
+			function deleteNodeInModel(nodeKey) {
+			  var deleteEndpoint = 'http://localhost:8080/Architecturemodeling/Component/ArchitectureModel/deleteByAttribute?attributeName=name&attributeValue=' + nodeKey;
+			
+			  return fetch(deleteEndpoint, {
+			    method: 'DELETE',
+			  })
+			    .then(response => {
+			      if (!response.ok) {
+			        console.error('Network response was not ok:', response.status);
+			        throw new Error('Network response was not ok');
+			      }
+			      // Return the response to handle success or additional actions if needed
+			      return response.json();
+			    })
+			    .catch(error => {
+			      console.error('Error:', error);
+			      throw error; // Rethrow the error to propagate it further
+			    });
+			}
+
+			*/
+			
+		
+			
+			
+			//======================DELETE A CONNECTOR===============
+							  
+				// Add event listener for connector deletion
+				myDiagram.addDiagramListener('SelectionDeleting', function (e) {
+				  // Check if the event involves connectors being deleted
+				  if (e.subject.first() instanceof go.Link) {
+				    // Iterate through the selected connectors and perform the delete operation
+				    e.subject.each(function (part) {
+				      if (part instanceof go.Link) {
+				        var connectorToDeleteData = part.data;
+				        var connectorName = connectorToDeleteData.text;
+				
+				        console.log('==========ConnectorName:', connectorName); // Print connectorName to the console
+				
+				        // Make an API call to delete the Connector in your EMF model
+				        deleteConnectorInModel(connectorName)
+				          .then(response => console.log('Successfully deleted connector:', response))
+				          .catch(error => console.error('Error deleting connector:', error));
+				      }
+				    });
+				  }
+				});
+				
+				
+			// Function to make an API call to delete the node in your EMF model
+			function deleteConnectorInModel(conKey) {
+			  var deleteEndpoint = 'http://localhost:8080/Architecturemodeling/Connector/ArchitectureModel/deleteByAttribute?attributeName=name&attributeValue=' + conKey;
+			
+			  return fetch(deleteEndpoint, {
+			    method: 'DELETE',
+			  })
+			    .then(response => {
+			      if (!response.ok) {
+			        console.error('Network response was not ok:', response.status);
+			        throw new Error('Network response was not ok');
+			      }
+			      // Return the response to handle success or additional actions if needed
+			      return response.text();
+			    })
+			    .catch(error => {
+			      console.error('Error:', error);
+			      throw error; // Rethrow the error to propagate it further
+			    });
+			}
+
+			
+			
+			//================DELETE AN ENTIRE CLASS <ALL COMPONENTS>==============
+				
+			// Function to make an API call to delete the model. Here we are deleting elements of component named "Component" of a specific model named "test"
+				function deleteComponents() {
+				  fetch('http://localhost:8080/Architecturemodeling/Component/Test/deleteClassByXMI', {
+				    method: 'DELETE',
+				  })
+				  .then(response => {
+				    if (!response.ok) {
+				      throw new Error('Network response was not ok');
+				    }
+				    return response.json();
+				  })
+				  .then(data => {
+				    console.log('Model deleted successfully:', data);
+				    // Optionally, you can handle additional actions after deletion
+				  })
+				  .catch(error => {
+				    console.error('Error deleting model:', error);
+				    // Optionally, you can handle error cases
+				  });
+				}
+
+			
+			
+				//================DELETE AN ENTIRE CLASS <ALL CONNECTORS>==============
+				
+				// Function to make an API call to delete the class. here we are deleting elements of class named "Connector" of a specific model named "test"
+					function deleteConnectors() {
+					  fetch('http://localhost:8080/Architecturemodeling/Connector/Test/deleteClassByXMI', {
+					    method: 'DELETE',
+					  })
+					  .then(response => {
+					    if (!response.ok) {
+					      throw new Error('Network response was not ok');
+					    }
+					    return response.json();
+					  })
+					  .then(data => {
+					    console.log('Model deleted successfully:', data);
+					    // Optionally, you can handle additional actions after deletion
+					    
+					     reloadPage(); // Reload the page after successful update
+					  })
+					  .catch(error => {
+					    console.error('Error deleting model:', error);
+					    // Optionally, you can handle error cases
+					  });
+					}
+
+				
+					//==========DELETE AN ENTIRE MODEL=====================
+						
+					// Function to make an API call to delete the model. Here we are delete a model named "test"
+					function deleteModel() {
+					  fetch('http://localhost:8080/Architecturemodeling/ArchitectureModel/ArchitectureModel/deleteClassByXMI', {
+					    method: 'DELETE',
+					  })
+					  .then(response => {
+					    if (!response.ok) {
+					      throw new Error('Network response was not ok');
+					    }
+					    return response.json();
+					  })
+					  .then(data => {
+					    console.log('Model deleted successfully:', data);
+					    // Optionally, you can handle additional actions after deletion
+					     reloadPage(); // Reload the page after successful update
+					  })
+					  .catch(error => {
+					    console.error('Error deleting model:', error);
+					    // Optionally, you can handle error cases
+					  });
+					}
+			
+			
+		//==========UPDATE and CREATE A COMPONENT FROM THE UI (changes the default Unit to a new name)========================	
+				
+			// Create a custom TextEditingTool
+			const customTextEditingTool = $(go.TextEditingTool, {
+			    // Override the standard behavior to customize text editing
+			    textValidation: (textblock, oldstr, newstr) => {
+			        // Implement your validation logic here, if needed
+			        return newstr.trim(); // Trim the entered text
+			    },
+			});
+
+		// Assign the custom tool to the diagram
+		myDiagram.toolManager.textEditingTool = customTextEditingTool;
+
+		// Add a "TextEdited" diagram listener to capture the edited text
+		myDiagram.addDiagramListener("TextEdited", (e) => {
+		    const textBlock = e.subject;
+		    const editedText = textBlock.text; // Access the edited text
+		    const node = textBlock.part; // Assuming the text block is part of a node
+		    
+		//check if the node.key is not Unit , otherwise you create a new new		  
+		    //if (Number(node.key)>0)  {
+		   if (node.key != "Unit")  {    
+		    if (node instanceof go.Node) {
+		    	console.log('checko:', node.key);
+		        // Make an API call to update the model server with the edited text
+		        updateComponentInModel(node.key, editedText)
+				        .then(response => {
+		                    console.log('Successfully updated component:', response);
+		                    reloadPage(); // Reload the page after successful update
+		                })
+		                .catch(error => console.error('Error updating component:', error));
+		    }   
+		    
+		  } 
+		  else{
+				
+			  console.log('check:', node.key);
+		    	//Creating a component;    	
+		    	 // Make an API call to create the new component
+		        createComponentInModel(editedText)
+		            .then(response => {
+		                console.log('Successfully created component:', response);
+						         
+		                // Add the new component to the diagram with an explicit key
+		                myDiagram.model.addNodeData({
+		                 		key: response.name, // Use the name from the response as the key
+		                    // Add other properties as needed
+		                });
+		                
+		                reloadPage(); // Reload the page after successful update
+		                
+		                // Ensure the diagram reflects the changes
+		               // myDiagram.updateTargetBindings();
+		            })
+		            .catch(error => console.error('Error creating component:', error));
+		  
+		  }
+		  
+		});
+			
+		
+		//===================DELETE TWO COMPONENT SIMULTANEOUSLY========
+		/*
+			// Add event listener for deletion
+			myDiagram.addDiagramListener('SelectionDeleting', function (e) {
+			  // Array to store information about nodes to delete
+			  var nodesToDelete = [];
+			
+			  // Check if the event involves nodes being deleted
+			  e.subject.each(function (part) {
+			    if (part instanceof go.Node) {
+			      // Code to handle node deletion
+			      var nodeToDeleteData = part.data;
+			      var componentName = nodeToDeleteData.key;
+			      nodesToDelete.push({ type: 'node', key: componentName });
+			    }
+			  });
+			
+			  console.log('Received DELETE requests for nodes:', nodesToDelete);
+			
+			  // Sequentially make API calls for deletion based on the gathered information
+			  nodesToDelete.reduce((prevPromise, nodeToDelete) => {
+			    return prevPromise.then(() => deleteItemInModel(nodeToDelete));
+			  }, Promise.resolve())
+			    .then(() => {
+			      console.log('Successfully deleted nodes.');
+			    })
+			    .catch(nodeError => {
+			      console.error('Error deleting nodes:', nodeError);
+			      window.alert(getErrorMessage(nodeError));
+			    });
+			});
+			
+			// Function to make an API call to delete a node in your EMF model
+			function deleteItemInModel(item) {
+			  var deleteEndpoint = 'http://localhost:8080/Architecturemodeling/Component/ArchitectureModel/deleteByAttribute?attributeName=name&attributeValue=' + item.key;
+			
+			  return fetch(deleteEndpoint, {
+			    method: 'DELETE',
+			  })
+			    .then(response => {
+			      if (!response.ok) {
+			        console.error('The required feature must be set:', response.status);
+			        return response.text().then(error => Promise.reject(new Error(error)));
+			      }
+			      return response.text();
+			    })
+			    .then(result => {
+			      console.log('Deletion successful for', item.type, item.key, 'Response:', result);
+			      return result;
+			    })
+			    .catch(error => {
+			      console.error('Error deleting', item.type, item.key, ':', error);
+			      throw error;
+			    });
+			}
+			
+		*/	
+				//===================DELETE TWO COMPONENT WITH ITS CONNECTOR SIMULTANEOUSLY========		
+			/*		
+					// Add event listener for deletion
+				myDiagram.addDiagramListener('SelectionDeleting', function (e) {
+				  // Arrays to store information about nodes and connectors to delete
+				  var nodesToDelete = [];
+				  var connectorsToDelete = [];
+				
+				  // Check if the event involves nodes or connectors being deleted
+				  e.subject.each(function (part) {
+				    if (part instanceof go.Node) {
+				      // Code to handle node deletion
+				      var nodeToDeleteData = part.data;
+				      var componentName = nodeToDeleteData.key;
+				      nodesToDelete.push({ type: 'node', key: componentName });
+				    } else if (part instanceof go.Link) {
+				      // Code to handle connector deletion
+				      var connectorToDeleteData = part.data;
+				      var connectorName = connectorToDeleteData.text;
+				      connectorsToDelete.push({ type: 'connector', key: connectorName });
+				    }
+				  });
+				
+				  console.log('Received DELETE requests for connectors:', connectorsToDelete);
+				  console.log('Received DELETE requests for nodes:', nodesToDelete);
+				
+				  // Sequentially make API calls for deletion based on the gathered information
+				  connectorsToDelete.reduce((prevPromise, connectorToDelete) => {
+				    return prevPromise.then(() => deleteItemInModel(connectorToDelete));
+				  }, Promise.resolve())
+				    .then(() => {
+				      // After connector deletions are successful, proceed with node deletions
+				      return nodesToDelete.reduce((prevPromise, nodeToDelete) => {
+				        return prevPromise.then(() => deleteItemInModel(nodeToDelete));
+				      }, Promise.resolve());
+				    })
+				    .then(() => {
+				      console.log('Successfully deleted connectors and nodes.');
+				    })
+				    .catch(error => {
+				      console.error('Error deleting:', error);
+				      window.alert(getErrorMessage(error));
+				    });
+				});
+				
+				// Function to make an API call to delete a node or connector in your EMF model
+				function deleteItemInModel(item) {
+				  var deleteEndpoint;
+				  if (item.type === 'node') {
+				    deleteEndpoint = 'http://localhost:8080/Architecturemodeling/Component/ArchitectureModel/deleteByAttribute?attributeName=name&attributeValue=' + item.key;
+				  } else if (item.type === 'connector') {
+				    deleteEndpoint = 'http://localhost:8080/Architecturemodeling/Connector/ArchitectureModel/deleteByAttribute?attributeName=name&attributeValue=' + item.key;
+				  }
+				
+				  return fetch(deleteEndpoint, {
+				    method: 'DELETE',
+				  })
+				    .then(response => {
+				      if (!response.ok) {
+				        console.error('The required feature must be set:', response.status);
+				        return response.text().then(error => Promise.reject(new Error(error)));
+				      }
+				      return response.text();
+				    })
+				    .then(result => {
+				      console.log('Deletion successful for', item.type, item.key, 'Response:', result);
+				      return result;
+				    })
+				    .catch(error => {
+				      console.error('Error deleting', item.type, item.key, ':', error);
+				      throw error;
+				    });
+				}
+
+		*/
+		
+		
+		//===================**********DELETE TWO ISOLATED COMPONENTS OR DELETE COMPONENTS AND ITS CORRESPONDING CONNECTOR*****************===================
+		// Add event listener for deletion
+							myDiagram.addDiagramListener('SelectionDeleting', function (e) {
+							  // Arrays to store information about nodes and connectors to delete
+							  var nodesToDelete = [];
+							  var connectorsToDelete = [];
+							
+							  // Check if the event involves nodes or connectors being deleted
+							  e.subject.each(function (part) {
+							    if (part instanceof go.Node) {
+							      // Code to handle node deletion
+							      var nodeToDeleteData = part.data;
+							      var componentName = nodeToDeleteData.key;
+							      nodesToDelete.push({ type: 'node', key: componentName });
+							    } else if (part instanceof go.Link) {
+							      // Code to handle connector deletion
+							      var connectorToDeleteData = part.data;
+							      var connectorName = connectorToDeleteData.text;
+							      connectorsToDelete.push({ type: 'connector', key: connectorName });
+							    }
+							  });
+							
+							  console.log('Received DELETE requests for connectors:', connectorsToDelete);
+							  console.log('Received DELETE requests for nodes:', nodesToDelete);
+							
+							  // Check if connectorsToDelete array is not empty (implies connectors are selected)
+							  if (connectorsToDelete.length > 0) {
+							    // Sequentially make API calls for deletion based on the gathered information
+							    connectorsToDelete.reduce((prevPromise, connectorToDelete) => {
+							      return prevPromise.then(() => deleteItemInModel(connectorToDelete));
+							    }, Promise.resolve())
+							      .then(() => {
+							        // After connector deletions are successful, proceed with node deletions
+							        return nodesToDelete.reduce((prevPromise, nodeToDelete) => {
+							          return prevPromise.then(() => deleteItemInModel(nodeToDelete));
+							        }, Promise.resolve());
+							      })
+							      .then(() => {
+							        console.log('Successfully deleted connectors and nodes.');
+							     // ------Reload the page after successful deletion--------
+							        reloadPage(); 
+							      })
+							      .catch(error => {
+							        console.error('Error deleting:', error);
+							        window.alert(getErrorMessage(error));
+							      });
+							  } else {
+							    // If connectors are not selected, proceed with deleting nodes simultaneously
+							    // Sequentially make API calls for deletion based on the gathered information
+							    nodesToDelete.reduce((prevPromise, nodeToDelete) => {
+							      return prevPromise.then(() => deleteItemInModel(nodeToDelete));
+							    }, Promise.resolve())
+							      .then(() => {
+							        console.log('Successfully deleted nodes.');
+							     //------ Reload the page after successful deletion------
+							        reloadPage(); 
+							      })
+							      .catch(nodeError => {
+							        console.error('Error deleting nodes:', nodeError);
+							        window.alert(getErrorMessage(nodeError));
+							      });
+							  }
+							});
+							
+							// Function to make an API call to delete a node or connector in your EMF model
+							function deleteItemInModel(item) {
+							  var deleteEndpoint;
+							  if (item.type === 'node') {
+							    deleteEndpoint = 'http://localhost:8080/Architecturemodeling/Component/ArchitectureModel/deleteByAttribute?attributeName=name&attributeValue=' + item.key;
+							  } else if (item.type === 'connector') {
+							    deleteEndpoint = 'http://localhost:8080/Architecturemodeling/Connector/ArchitectureModel/deleteByAttribute?attributeName=name&attributeValue=' + item.key;
+							  }
+							
+							  return fetch(deleteEndpoint, {
+							    method: 'DELETE',
+							  })
+							    .then(response => {
+							      if (!response.ok) {
+							        console.error('The required feature must be set:', response.status);
+							        return response.text().then(error => Promise.reject(new Error(error)));
+							      }
+							      return response.text();
+							    })
+							    .then(result => {
+							      console.log('Deletion successful for', item.type, item.key, 'Response:', result);
+							      return result;
+							    })
+							    .catch(error => {
+							      console.error('Error deleting', item.type, item.key, ':', error);
+							      throw error;
+							    });
+							}
+
+			
+			
+			//=============**********************=========================
+		
+		
+		
+		
+		
+		
+		
+		
+	//=====================================
+		/*
+			// Function to make an API call to update the component in your EMF model
+					function updateComponent() {
+					    // Get the selected node
+					    var selectedNode = myDiagram.selection.first();
+					    if (selectedNode instanceof go.Node) {
+					        // Prompt the user for a new name
+					        var newName = prompt("Enter the updated name:", selectedNode.data.key);
+					        if (newName !== null) {
+					            // Make an API call to update the component in your EMF model
+					            updateComponentInModel(selectedNode.data.key, newName)
+					                .then(response => {
+					                    console.log('Successfully updated component:', response);
+					
+					                    // Update the node's key (name) in the diagram
+					                    myDiagram.model.startTransaction("updateComponent");
+					                    myDiagram.model.setDataProperty(selectedNode.data, "key", newName);
+					                    myDiagram.model.commitTransaction("updateComponent");
+					
+					                    // Ensure the diagram reflects the changes
+					                    myDiagram.updateTargetBindings();
+					                })
+					                .catch(error => console.error('Error updating component:', error));
+					        }
+					    }
+					}
+	*/
+		//===========================================
+			
+		
+			// Function to make an API call to update the component in your EMF model
+			function updateComponentInModel(nodeName, newName) {
+			  var updateEndpoint = 'http://localhost:8080/Architecturemodeling/Component/ArchitectureModel/update?attributeName=name&attributeValue=' + encodeURIComponent(nodeName) + '&updatedValue=' + encodeURIComponent(newName);
+			  return fetch(updateEndpoint, {
+			    method: 'PUT',
+			  })
+			    .then(response => {
+			    	//console.log('Raw API Response:', response);
+			        //return response.json();
+			        
+			    	console.log('API call response:', response);
+			        console.log('After API call - newName:', newName);
+			      if (!response.ok) {
+			        console.error('Network response was not ok:', response.status);
+			        throw new Error('Network response was not ok');
+			      }
+			      return response.json();  // Get the response text instead of JSON
+			    })
+			    .then(responseText => {
+			      // Log the response text received from the server
+			      console.log('Server response text:', responseText);
+
+			      // Attempt to parse JSON (will throw an error if not valid JSON)
+			      return JSON.parse(responseText);
+			    })
+			    .then(jsonData => {
+			      // Log the JSON data received from the server
+			      console.log('Server response JSON:', jsonData);
+			      return jsonData;
+			    })
+			    .catch(error => {
+			      console.error('Error updating component:', error);
+			      throw error; // Rethrow the error to propagate it further
+			    });
+			}//End of Update
+		
+			
+			//=======CREATE NEW COMPONENT=================	
+				
+				/*
+	
+							// Function to create a new component
+								function createNewComponent() {
+						        // Prompt the user for a name for the new component
+						      var componentName = prompt("Enter the name for the new component:") || "DefaultName";
+						        
+						        
+						        // Make an API call to create the new component
+						        createComponentInModel(componentName)
+						            .then(response => {
+						                console.log('Successfully created component:', response);
+						
+						                // Add the new component to the diagram with an explicit key
+						                myDiagram.model.addNodeData({
+						                    key: response.name, // Use the name from the response as the key
+						                    // Add other properties as needed
+						                });
+						
+						                // Ensure the diagram reflects the changes
+						                myDiagram.updateTargetBindings();
+						            })
+						            .catch(error => console.error('Error creating component:', error));
+						    }
+							
+				*/			
+							
+						
+						    // Function to make an API call to create a new component in your EMF model
+						    function createComponentInModel(componentName) {
+						        var createEndpoint = 'http://localhost:8080/Architecturemodeling/ArchitectureModel/Component/ArchitectureModel/newElement';
+						        var requestData = {
+						            name: componentName, // Ensure the key matches the name from your model
+						            // Add other attributes as needed
+						        };
+						
+						        return fetch(createEndpoint, {
+						            method: 'POST',
+						            headers: {
+						                'Content-Type': 'application/json',
+						            },
+						            body: JSON.stringify(requestData),
+						        })
+						        .then(response => {
+						            if (!response.ok) {
+						                console.error('Network response was not ok:', response.status);
+						                throw new Error('Network response was not ok');
+						            }
+						            return response.json();
+						        })
+						        .catch(error => {
+						            console.error('Error:', error);
+						            throw error; // Rethrow the error to propagate it further
+						        });
+						    }
+						//EndCreate New Component
+
+						
+						
+			//===========================CREATE A CONNECTOR=========================
+				/*
+				// Event handler for the LinkDrawn event
+				  function onLinkDrawn(event) {
+				    var link = event.subject; // The newly created link
+				
+				    // Check if the link connects two nodes
+				    if (link.fromNode instanceof go.Node && link.toNode instanceof go.Node) {
+				      // Set the 'from' and 'to' properties based on the connected nodes
+				      link.fromNode = link.fromNode;
+				      link.toNode = link.toNode;
+				
+				      // Set the 'text' property to a default or ask the user for input
+				      var connectorName = prompt("Enter the connector name:", "DefaultName");
+				      link.text = connectorName || "DefaultName";
+				
+				      // Create a new connector using the API endpoint
+				      createConnectorInModel(link.fromNode.data.key, link.toNode.data.key, link.text)
+				        .then(response => console.log('Successfully created connector:', response))
+				        .catch(error => console.error('Error creating connector:', error));
+				    } else {
+				      // Remove the link if it doesn't connect two nodes
+				      myDiagram.model.removeLinkData(link.data);
+				    }
+				  }
+				  
+				  // Function to make an API call to create a new connector in your EMF model
+				  function createConnectorInModel(fromNodeKey, toNodeKey, connectorName) {
+				    var createConnectorEndpoint = 'http://localhost:8080/Architecturemodeling/ArchitectureModel/Connector/ArchitectureModel/newElement';
+				
+				    var connectorData = {
+				    	    name: connectorName,
+				    	    source: { key: fromNodeKey },
+				    	    target: { key: toNodeKey }
+				    	  };
+				 // Before sending data to the backend
+				    console.log('Connector Data:', connectorData);
+				 
+				    return fetch(createConnectorEndpoint, {
+				      method: 'POST',
+				      headers: {
+				        'Content-Type': 'application/json'
+				      },
+				      body: JSON.stringify(connectorData)
+				    })
+				    
+				    
+				      .then(response => {
+				        if (!response.ok) {
+				          console.error('Network response was not ok:', response.status);
+				          throw new Error('Network response was not ok');
+				        }
+				        return response.json();
+				      })
+				      .catch(error => {
+				        console.error('Error:', error);
+				        throw error; // Rethrow the error to propagate it further
+				      });
+				  }
+				  //end CreateConnector
+*/
+						
+				myDiagram.addDiagramListener("LinkDrawn", function (event) {
+					  var link = event.subject;
+				
+					  if (link instanceof go.Link) {
+					    var fromNode = link.fromNode;
+					    var toNode = link.toNode;
+				
+					    if (fromNode instanceof go.Node && toNode instanceof go.Node) {
+					      //var connectorName = prompt("Enter connector name:");
+						var connectorName = fromNode.data.key+"_"+toNode.data.key;
+					      // Assuming your backend endpoint accepts a POST request with the following format
+					      var connectorData = {
+					        source: fromNode.data.key,  // send only the ID of the source Component
+					        target: toNode.data.key,    // send only the ID of the target Component
+					        name: connectorName
+					      };
+				
+					      console.log('Connector Data:', connectorData);
+				
+					      fetch('http://localhost:8080/Architecturemodeling/ArchitectureModel/Connector/ArchitectureModel/newEopposite?fieldType=Component', {
+					        method: 'POST',
+					        headers: {
+					          'Content-Type': 'application/json',
+					        },
+					        body: JSON.stringify(connectorData),
+					      })
+					      .then(response => response.text())
+					      .then(data => {
+					        console.log('Connector created:', data);
+					      })
+					      .catch(error => {
+					        console.error('Error creating connector:', error);
+					      });
+					    }
+					  }
+					});  
+				  
+			/*
+		      myDiagram.contextMenu =
+		        $("ContextMenu",
+		          makeButton("Paste",
+		            (e, obj) => e.diagram.commandHandler.pasteSelection(e.diagram.toolManager.contextMenuTool.mouseDownPoint),
+		            o => o.diagram.commandHandler.canPasteSelection(o.diagram.toolManager.contextMenuTool.mouseDownPoint)),
+		          makeButton("Undo",
+		            (e, obj) => e.diagram.commandHandler.undo(), o => o.diagram.commandHandler.canUndo()),
+		          makeButton("Redo",
+		            (e, obj) => e.diagram.commandHandler.redo(),o => o.diagram.commandHandler.canRedo()),
+		          
+		        );
+		      */
+		      
+		      myDiagram.contextMenu =
+			        $("ContextMenu",
+			          makeButton("Paste", (e, obj) => e.diagram.commandHandler.pasteSelection(e.diagram.toolManager.contextMenuTool.mouseDownPoint)),
+			          makeButton("Undo", (e, obj) => e.diagram.commandHandler.undo()),
+			          makeButton("Redo", (e, obj) => e.diagram.commandHandler.redo()), 
+			          $(go.Shape, "LineH", { strokeWidth: 2, height: 1, stretch: go.GraphObject.Horizontal }),
+			          makeButton("Create Component", (e, obj) => createNewComponent()),
+			          //makeButton("Delete AllComponents", (e, obj) => deleteComponents()),  // Added update button
+			          //makeButton("Delete AllConnectors", (e, obj) => deleteConnectors()),
+			          makeButton("Delete Model", (e, obj) => deleteModel())     
+			        );
+		     
+		      
+		      //API to watch for changes in the DOM (Document Object Model) and trigger a reload when changes occur
+		      /*
+		      setInterval(function() {
+		    	    location.reload();
+		    	}, 5000); // Reloads the page every 5 seconds (adjust the interval as needed)
+		   
+		    	// Create a MutationObserver instance
+		    	const observer = new MutationObserver(function (mutationsList) {
+		    	    for (const mutation of mutationsList) {
+		    	        if (mutation.type === 'childList') {
+		    	            // Child elements have been added or removed
+		    	            location.reload();
+		    	            break; // Stop observing after the first change to avoid continuous reloading
+		    	        }
+		    	    }
+		    	});
+
+		    	 */
+		    	 
+		    	// =========Reload the page when there is a change============
+		    	 function reloadPage() {
+		    	   location.reload();
+		    	 }	    	 
+		      
+</script>
+
+
+</body>
+</html>
