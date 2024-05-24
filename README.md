@@ -28,7 +28,7 @@ The middleware has been developed using the [Spring Boot framework](https://spri
 > When a REST API call is initiated, the operational flow proceeds as follows: The operational flow begins at the controller layer, which handles incoming requests. The service layer processes these requests, often requiring data interactions with the code repository layer. Once processing is complete, the service layer relays the outcomes to the controller, which then builds a response.
 
 <img src="https://github.com/tuadiel6/DynamicEMF-REST-API/blob/main/Figures/REST%20Call.png" width="300" height="250"/>
-<p align="left"> Fig.Example response of the REST call</p>
+<p align="left"> Fig. Example response of the REST call</p>
 
 
 ## (c) Discovery component
