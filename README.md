@@ -9,7 +9,7 @@ This repository was created to store model-based artifacts, primarily focusing o
 
 ## (b) Middleware
 The middleware has been developed using the [Spring Boot framework](https://spring.io/projects/spring-boot), a component of the Spring ecosystem that simplifies application development by reducing manual configuration. Spring Boot simplifies service setup and deployment with an embedded server, facilitating the creation of microservices in our REST API middleware.
-<p align="justify">The implemented middleware follows a three-layer architecture, inspired by the Spring Boot framework, consisting of the code repository, service, and controller layers. Below, we describe the main responsibilities of each layer in our approach:</p>
+<p align="justify">The implemented middleware follows a three-layer architecture, inspired by the Spring Boot framework, consisting of the code repository, service, and controller layers. To ensure versatility in handling diverse models, we employed Java reflection, allowing us to dynamically inspect and modify runtime attributes, including classes, interfaces, fields, and methods of generated code within the Code Repository. Below, we describe the main responsibilities of each layer in our approach:</p>
 
 ### (1) Code Repository Layer
 <p align="justify">This layer is the primary gateway for data access within our approach. It handles the retrieval, storage, and manipulation of data, encapsulating fundamental CRUD (Create, Read, Update, Delete) operations and translating them into model manipulation operations.</p>
