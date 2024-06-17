@@ -1,5 +1,5 @@
-# REFLECTIVE EMF-REST-API
-Dynamic EMF-REST API approach to expose the EMF model as REST endpoints for remote access.
+# Dynamic Provisioning of REST APIs for Model Management
+An approach to provide RESTful services for model management that can be used to interact with any kind of model.
 
 # SCENARIO-BASED TESTING TO EVALUATE THE APPROACH
 Inspired by scenario-based testing we defined a set of scenarios to evaluate our approach in terms of effectiveness.
