@@ -1,6 +1,6 @@
 # Dynamic Provisioning of REST APIs for Model Management
-An approach to provide RESTful services for model management that can be used to interact with any kind of model.
-
+We present an approach to dynamic provisioning RESTful services for model management, where a REST API is provided on-the-fly for any kind of model. We implemented the approach as a middleware, which can be used to expose RESTful services for model management, and we evaluated it in a case study based on a Web-based modeling platform for architectural models.
+Our middleware supports a range of model manipulation operations, as detailed in Table
 # SCENARIO-BASED TESTING TO EVALUATE THE APPROACH
 Inspired by scenario-based testing we defined a set of scenarios to evaluate our approach in terms of effectiveness.
 Each scenario covers several steps, that are used to ensure that every single functionality of a system is working as expected. Scenario S1 represents the initial model, while scenarios S2-S8 are mutations of S1. Additionally, a demo video is also provided at the following link: [Demo Video](https://www.youtube.com/watch?v=3eRj2T6TQsc)
