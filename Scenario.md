@@ -10,7 +10,7 @@ Our middleware supports a range of model manipulation operations, as detailed in
 | ADD 	| Add an element to a specific class by specifying  the class with which it should be associated. 	| POST 	| .../{packageName}/{className}/{xmiFileName}/addExisting?  parentContainmentName=`<param1>`&attributeNameToMatch=`<param2>`& attributeValueToMatch=`<param3>`&childClassName=`<param4>`& childContainmentName=`<param5>` 	|
 | ADD 	| In the scenario of a bidirectional relationship,  add an element in a specific model by setting  the field reference to point to an instance  of another class type. 	| POST 	| .../{packageName}/{parentClassName}/{childClassName}/{xmiFileName} /newEopposite?fieldType=`<param1>` 	|
 | UPDATE 	| Update the element based on the key attribute  and its corresponding value 	| PUT 	| .../{packageName}/{className}/{xmiFileName}/update? attributeName=&lt;param1&gt;&amp;attributeValue=&lt;`param2`&gt; &amp;updatedValue=&lt;`param3`&gt; 	|
-| DELETE 	| Delete the element based on the key attribute  and its corresponding value 	| DELETE 	| .../{packageName}/{className}/{xmiFileName}/deleteByAttribute? attributeName=`<param1>`&attributeValue=`<param2>` 	|
+| DELETE 	| Delete the element based on the key attribute  and its corresponding value 	| DELETE 	| .../{packageName}/{className}/{xmiFileName}/deleteByAttribute?  attributeName=`<param1>`&attributeValue=`<param2>` 	|
 | DELETE 	| Delete an entire class by indicating the specific class to be deleted 	| DELETE 	| .../{packageName}/{className}/{xmiFileName}/deleteClassByXMI 	|
 
 # SCENARIO-BASED TESTING TO EVALUATE THE APPROACH
