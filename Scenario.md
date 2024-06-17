@@ -3,7 +3,7 @@ We present an approach to dynamic provisioning RESTful services for model manage
 Our middleware supports a range of model manipulation operations, as detailed in the following Table:
 
 | Operation 	| Description 	| HTTP  Method 	| Endpoint 	|
-|---	|---	|---	|---	|
+|---	|---	  |---	|---	   |
 | READ 	| Read all elements from models that conform  to the same metamodel 	| GET 	| .../{packageName}/{className}/all 	|
 | READ 	| Filter an element of a specific model, filtered  by a key attribute and its corresponding value. 	| GET 	| .../{packageName}/{className}/{containmentName}/search? attributeName=<param1>&attributeValue=<param2> 	|
 | ADD 	| Add an element to a specific model 	| POST 	| .../{PackageName}/{parentClass}/{childClass}/{xmiFileName}/newElement 	|
