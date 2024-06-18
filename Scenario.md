@@ -16,8 +16,7 @@ Our middleware supports a range of model manipulation operations, as detailed in
 | DELETE 	| Delete an entire class by indicating the specific class to be deleted 	| DELETE 	| .../{packageName}/{className}/{xmiFileName}/deleteClassByXMI 	|
 
 <p> The endpoint paths, as outlined, include placeholders for parameters, like $packageName$, $className$, and $xmiFileName$, which are essential for run-time executing our approach. 
-Request parameters like $attributeName$, $attributeValue$, etc. extract values from HTTP query parameters (e.g., $param1$, $param2$) and bind them to method signature parameters. 
-This enables the instantiation of new objects, method invocation, and access or alteration of field values using reflection.</p>
+Request parameters like $attributeName$, $attributeValue$, etc. extract values from HTTP query parameters (e.g., $param1$, $param2$) and bind them to method signature parameters. This enables the instantiation of new objects, method invocation, and access or alteration of field values using reflection.</p>
 
 # SCENARIO-BASED TESTING TO EVALUATE THE APPROACH
 Inspired by scenario-based testing we defined a set of scenarios to evaluate our approach in terms of effectiveness.
