@@ -3,6 +3,7 @@ We present an approach to dynamic provisioning RESTful services for model manage
 Our middleware supports a range of model manipulation operations, as detailed in the following Table:
 
 <p align="center"> Table 1: Operations supported by our middleware</p>
+
 | Operation 	| Description  | HTTP  Method 	| Endpoint 	|
 |---	|---	  |---	|---	   |
 | READ 	| Read all elements from models that conform  to the same metamodel 	| GET 	| .../{packageName}/{className}/all 	|
