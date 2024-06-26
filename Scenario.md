@@ -142,7 +142,7 @@ Each scenario covers several steps, that are used to ensure that every single fu
 
 ## REST APIs Calls Documentation in Postman
 > [!IMPORTANT]
-> REST API calls documentation with the configuration is also available showing how we have applied the REST APIs to read and write to the model. Click on the image below:
+> REST API calls documentation with the configuration is available showing how we have applied the REST APIs to read and write to the model. Click on the image below to run the saved API calls:
 
 [![IMAGE ALT TEXT](https://github.com/tuadiel6/DynamicEMF-REST-API/blob/main/Figures/postman.png)](https://documenter.getpostman.com/view/9464769/2sA3drJa2Y "REST APIs Calls")
 
