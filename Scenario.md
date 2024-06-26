@@ -140,11 +140,11 @@ Each scenario covers several steps, that are used to ensure that every single fu
 <img src="https://github.com/tuadiel6/Reflective-EMF-REST-API/blob/main/Figures/DeleteModel.png" >
 <p align="center"> Fig.10. Delete an entire model</p>
 
-## Our Documentation Link in Postman
+## REST APIs Calls Documentation in Postman
 > [!IMPORTANT]
-> REST APIs documentation link is also available on the following link:
+> REST API calls documentation with the configuration is also available showing how we have applied the REST APIs to read and write to the model. Click on the image below:
 
-[![IMAGE ALT TEXT](https://github.com/tuadiel6/DynamicEMF-REST-API/blob/main/Figures/postman.png)](https://documenter.getpostman.com/view/9464769/2sA3drJa2Y "POSTMAN")
+[![IMAGE ALT TEXT](https://github.com/tuadiel6/DynamicEMF-REST-API/blob/main/Figures/postman.png)](https://documenter.getpostman.com/view/9464769/2sA3drJa2Y "REST APIs Calls")
 
 ## Demo Video
 > [!IMPORTANT]
