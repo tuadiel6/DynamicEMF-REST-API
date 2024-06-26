@@ -144,7 +144,7 @@ Each scenario covers several steps, that are used to ensure that every single fu
 > [!IMPORTANT]
 > REST APIs documentation link is also available on the following link:
 
-[![IMAGE ALT TEXT](https://img.youtube.com/vi/3eRj2T6TQsc/0.jpg)](https://documenter.getpostman.com/view/9464769/2sA3drJa2Y "POSTMAN")
+[![IMAGE ALT TEXT](https://github.com/tuadiel6/DynamicEMF-REST-API/blob/main/Figures/postman.png)](https://documenter.getpostman.com/view/9464769/2sA3drJa2Y "POSTMAN")
 
 ## Demo Video
 > [!IMPORTANT]
