@@ -20,7 +20,7 @@ Request parameters like $attributeName$, $attributeValue$, etc. extract values f
 
 # SCENARIO-BASED TESTING TO EVALUATE THE APPROACH
 Inspired by scenario-based testing we defined a set of scenarios to evaluate our approach in terms of effectiveness.
-Each scenario covers several steps, that are used to ensure that every single functionality of a system is working as expected. The first scenario (i.e., S1) is used as a seed for elaborating mutations on the others. Indeed, the model used for the first scenario will be manipulated by the other scenarios ( i.e., S2-S8) by applying model manipulation actions. Additionally, a demo video is also provided at the following link: [Demo Video](https://www.youtube.com/watch?v=3eRj2T6TQsc)
+Each scenario covers several steps, that are used to ensure that every single functionality of a system is working as expected. We show, for each scenario, the instantiated endpoint used by the frontend application to populate the editor or to manipulate the modeled architecture (see Endpoint column). The first scenario (i.e., S1) is used as a seed for elaborating mutations on the others. Indeed, the model used for the first scenario will be manipulated by the other scenarios ( i.e., S2-S8) by applying model manipulation actions. Additionally, a demo video is also provided at the following link: [Demo Video](https://www.youtube.com/watch?v=3eRj2T6TQsc)
 ## Scenario S1: Load a model
 
 | Id| Category| Scenario| Endpoint| Expected Results| Observed Results|
