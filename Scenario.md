@@ -140,6 +140,12 @@ Each scenario covers several steps, that are used to ensure that every single fu
 <img src="https://github.com/tuadiel6/Reflective-EMF-REST-API/blob/main/Figures/DeleteModel.png" >
 <p align="center"> Fig.10. Delete an entire model</p>
 
+## Our Documentation Link in Postman
+> [!IMPORTANT]
+> REST APIs documentation link is also available on the following link:
+
+[![IMAGE ALT TEXT](https://img.youtube.com/vi/3eRj2T6TQsc/0.jpg)](https://documenter.getpostman.com/view/9464769/2sA3drJa2Y "POSTMAN")
+
 ## Demo Video
 > [!IMPORTANT]
 > This video serves as a brief demonstration, showcasing scenarios used to assess our approach.
