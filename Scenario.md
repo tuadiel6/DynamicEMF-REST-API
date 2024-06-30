@@ -148,7 +148,7 @@ Each scenario covers several steps, that are used to ensure that every single fu
 
 ## Demo Video
 > [!IMPORTANT]
-> This video serves as a brief demonstration, showcasing scenarios used to assess our approach.
+> This video serves as a brief demonstration, showcasing the approach and scenarios used to assess our approach.
 
-[![IMAGE ALT TEXT](https://img.youtube.com/vi/3eRj2T6TQsc/0.jpg)](https://youtu.be/3eRj2T6TQsc "SCENARIO-BASED TESTING")
+[![IMAGE ALT TEXT](https://img.youtube.com/vi/3eRj2T6TQsc/0.jpg)](https://youtu.be/eaxeDpovSu0 "Tool Demo")
 
