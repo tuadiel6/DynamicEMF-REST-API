@@ -37,7 +37,8 @@ import org.eclipse.emf.common.util.EList;
 
 @Repository
 public class ReflectionRepository {
-String modelDirectory = "/Users/adielt./Desktop/WebServiceConference/Dynamic-EMF-REST-API/src/main/resources/model";
+
+String modelDirectory = "/Users/adielt./git/repository2/Dynamic-EMF-REST-API/src/main/resources/MDERepository";
 	// A map of available models within the specified directory.
 	public Map<String, List<String>> loadAvailableModels() 
 			throws FileNotFoundException {
@@ -158,21 +159,10 @@ String modelDirectory = "/Users/adielt./Desktop/WebServiceConference/Dynamic-EMF
 	            if (element.eClass().getName().equals(className)) {
 	                allModelElements.add(element);
 	            }
-	            
-	            //System.out.println("$$$$:"+element);
+	    
 	        }
-	        System.out.println("+++++++++++++++++++++++++++++++++++++++++");
-	         
-	        //allModelElements.add(resource.getContents().get(0));
-	        
-			        /*
-					      //===== chek the validity of the model========
-				             if (!validateObject(resource)) {
-				                 // Handle validation failure
-				                 System.err.println("Validation failed for resource: " + resource.getURI());
-				                 throw new ValidationException("Error : The required feature for source and target must be set");
-				             }
-				         */    
+	        //System.out.println("+++++++++++++++++++++++++++++++++++++++++");
+	          
 	        String validationMessage = validateObject(resource);
 	        if (validationMessage.isEmpty()) {
 	            System.out.println("Model is valid.");
@@ -382,9 +372,8 @@ String modelDirectory = "/Users/adielt./Desktop/WebServiceConference/Dynamic-EMF
 
 	}
 	
-		
 	
-	//======================Loading XMI based on a specific XMI File===================
+	//====================== Loading XMI based on a specific XMI File ===================
 	public List<EObject> loadXMIPath(String packageName, String className, String xmiFileName) 
 			throws ReflectiveOperationException, FileNotFoundException {
 	    // Method to obtain a map of available models where keys are package names, and values are lists of file paths.
@@ -443,17 +432,15 @@ String modelDirectory = "/Users/adielt./Desktop/WebServiceConference/Dynamic-EMF
 		        Iterator<EObject> allContents = EcoreUtil.getAllContents(resource, true);
 		        while (allContents.hasNext()) {
 		            EObject element = allContents.next();
-		            System.out.println("Element Class Name: " + element.eClass().getName());
-		            System.out.println("Expected Class Name: " + className);
+		            //System.out.println("Element Class Name: " + element.eClass().getName());
+		            //System.out.println("Expected Class Name: " + className);
 	
 		            if (element.eClass().getName().equals(className)) {
 		                allModelElements.add(element);
 		            }
 		        }
-		        System.out.println("+++++++++++++++++++++++++++++++++++++++++");
+		        //System.out.println("+++++++++++++++++++++++++++++++++++++++++");
 		         
-		        //allModelElements.add(resource.getContents().get(0));
-		        
 		        System.out.println("Model Elements:"+allModelElements);
 	        
 	    }
@@ -466,45 +453,13 @@ String modelDirectory = "/Users/adielt./Desktop/WebServiceConference/Dynamic-EMF
 	
 	
 	 // ============Model validation=================== 
-	/*
-    public static boolean validateObject(Resource resource) {
-		EObject eo = resource.getContents().get(0);
-		Diagnostic diagnostic = Diagnostician.INSTANCE.validate(eo);
-						System.out.println("Validation Diagnostic for: " + resource.getURI());
-					    System.out.println("Severity: " + diagnostic.getSeverity());
-					    System.out.println("Message: " + diagnostic.getMessage());
-					    for (Diagnostic childDiagnostic : diagnostic.getChildren()) {
-					        System.out.println("Child Severity: " + childDiagnostic.getSeverity());
-					        System.out.println("Child Message: " + childDiagnostic.getMessage());
-					    }
-
-		
-		if (diagnostic.getSeverity() == Diagnostic.ERROR || diagnostic.getSeverity() == Diagnostic.WARNING) {
-			System.out.println("VALIDATION MSG:"+diagnostic.getMessage());
-			for (Iterator i = diagnostic.getChildren().iterator(); i.hasNext();) {
-				Diagnostic childDiagnostic = (Diagnostic) i.next();
-				switch (childDiagnostic.getSeverity()) {
-				case Diagnostic.ERROR:
-				case Diagnostic.WARNING:
-					System.err.println("\t" + childDiagnostic.getMessage());
-				}
-			}
-			return false;
-		}
-		return true;
-	}
-	*/
 	
 	public static String validateObject(Resource resource) {
 	    EObject eo = resource.getContents().get(0);
 	    Diagnostic diagnostic = Diagnostician.INSTANCE.validate(eo);
 	    StringBuilder validationMessage = new StringBuilder();
-	    //validationMessage.append("Validation Diagnostic for: ").append(resource.getURI()).append("\n");
-	    //validationMessage.append("Severity: ").append(diagnostic.getSeverity()).append("\n");
-	    //validationMessage.append("Message: ").append(diagnostic.getMessage()).append("\n");
+	    
 	    for (Diagnostic childDiagnostic : diagnostic.getChildren()) {
-	       // validationMessage.append("Child Severity: ").append(childDiagnostic.getSeverity()).append("\n");
-	        //validationMessage.append("Child Message: ").append(childDiagnostic.getMessage()).append("\n");
 	        validationMessage.append(childDiagnostic.getMessage()).append("\n");
 	    }
 
@@ -517,7 +472,6 @@ String modelDirectory = "/Users/adielt./Desktop/WebServiceConference/Dynamic-EMF
 	                case Diagnostic.WARNING:
 	                System.err.println("Message: " + diagnostic.getMessage());
 	                System.err.println( childDiagnostic.getMessage());
-	                   //validationMessage.append("\t").append(childDiagnostic.getMessage()).append("\n");
 	            }
 	        }
 	    }

@@ -19,5 +19,7 @@ Export-Package: Example,
  Architecturemodeling.util
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
- org.eclipse.emf.ecore.xmi;bundle-version="2.18.0"
+ org.eclipse.emf.ecore.xmi;bundle-version="2.18.0",
+ org.eclipse.emf.codegen;bundle-version="2.23.0",
+ org.eclipse.emf.codegen.ecore
 Bundle-ActivationPolicy: lazy

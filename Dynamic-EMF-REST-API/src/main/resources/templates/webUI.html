@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoJS Visualization</title>
+  <script src="https://unpkg.com/gojs/release/go-debug.js"></script>
+
+</head>
+ <style>
+body {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+	margin: 0;
+	}
+
+#myDiagramDiv {
+	width: 80%;
+	height: 600px;
+	border: 1px solid #ddd; /* Add border for visibility */
+	}
+</style>
+</head>
+<body>
+  <div id="myDiagramDiv" style="border: solid 1px blue; width: 1000px; height: 1000px;"></div>
+ 
+ 
+ <script>
+  var $ = go.GraphObject.make;
+  var myDiagram;
+
+  myDiagram = $(go.Diagram, "myDiagramDiv", {
+    "undoManager.isEnabled": true
+  });
+
+  myDiagram.addDiagramListener("Modified", e => {
+    const button = document.getElementById("SaveButton");
+    if (button) button.disabled = !myDiagram.isModified;
+    const idx = document.title.indexOf("*");
+    if (myDiagram.isModified) {
+      if (idx < 0) document.title += "*";
+    } else {
+      if (idx >= 0) document.title = document.title.slice(0, idx);
+    }
+  });
+
+  
+
+  function makeButton(text, action, visiblePredicate) {
+    return $("ContextMenuButton",
+      $(go.TextBlock, text),
+      { click: action },
+      visiblePredicate ? new go.Binding("visible", "", (o, e) => o.diagram ? visiblePredicate(o, e) : false).ofObject() : {});
+  }
+
+  const nodeMenu = $("ContextMenu",
+    makeButton("Copy", (e, obj) => e.diagram.commandHandler.copySelection()),
+    makeButton("Delete", (e, obj) => e.diagram.commandHandler.deleteSelection()),
+    $(go.Shape, "LineH", { strokeWidth: 2, height: 1, stretch: go.GraphObject.Horizontal }),
+    makeButton("Update component", (e, obj) => updateComponent())
+  );
+
+  const portSize = new go.Size(8, 8);
+
+  myDiagram.nodeTemplate =
+    $(go.Node, 'Spot',
+      $(go.Panel, "Auto",
+        $(go.Shape, 'Rectangle', { fill: 'lightblue', stroke: 'black', strokeWidth: 1, minSize: new go.Size(50, 50), contextMenu: nodeMenu }),
+        new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
+        $(go.TextBlock,
+          { margin: 10, textAlign: "center", font: "bold 12px Segoe UI,sans-serif", wrap: go.TextBlock.WrapFit, width: 100, stroke: "#484848", editable: true },
+          new go.Binding("text", "keyo").makeTwoWay())
+      ),
+      $(go.Panel, "Auto",
+        { alignment: new go.Spot(0, 0.5) },
+        $(go.Shape, "Rectangle",
+          {
+            fill: "#66d6d1",
+            desiredSize: new go.Size(8, 8),
+            portId: "l", fromSpot: go.Spot.Left, toSpot: go.Spot.Left,
+            fromLinkable: true, toLinkable: true, cursor: "pointer",
+          }
+        )
+      ),
+      $(go.Panel, "Auto",
+        { alignment: new go.Spot(1, 0.5) },
+        $(go.Shape, "Rectangle",
+          {
+            fill: "#fae3d7",
+            desiredSize: new go.Size(8, 8),
+            portId: "r", fromSpot: go.Spot.Right, toSpot: go.Spot.Right,
+            fromLinkable: true, toLinkable: true, cursor: "pointer",
+          }
+        )
+      )
+    );
+
+  myDiagram.linkTemplate =
+    $(go.Link,
+      {
+        routing: go.Link.AvoidsNodes,
+        corner: 4,
+        reshapable: true,
+        resegmentable: true,
+        relinkableFrom: true,
+        relinkableTo: true
+      },
+      new go.Binding("points").makeTwoWay(),
+      $(go.Shape, { stroke: "#2F4F4F", strokeWidth: 2 })
+    );
+
+  myDiagram.model.linkFromPortIdProperty = "fromPort";
+  myDiagram.model.linkToPortIdProperty = "toPort";
+
+  fetch('http://localhost:8080/Architecturemodeling/Component/all')
+    .then(response => {
+      if (!response.ok) {
+        return response.text().then(errorMessage => {
+          throw new Error(errorMessage);
+        });
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        var flattenedData = data.flat();
+        var linkDataArray = [];
+        var nodeDataArray = flattenedData.map(function (item) {
+          return {
+            keyo: item.name,
+            incoming: item.incoming,
+            outgoing: item.outgoing,
+            id: item.id,
+            loc: `${Math.max(0, item.positionX)} ${Math.max(0, item.positionY)}`, // Ensure positive coordinates
+            //ke: item.name
+          };
+        });
+
+        console.log('Node Data Array:', nodeDataArray);
+
+        for (var i = 0; i < nodeDataArray.length; i++) {
+          var outgoingPorts = nodeDataArray[i].outgoing;
+          console.log('Outgoing Ports for ' + nodeDataArray[i].key + ':', outgoingPorts);
+
+          if (outgoingPorts) {
+            for (var k = 0; k < outgoingPorts.length; k++) {
+              var targetNode = nodeDataArray.find(node => node.incoming.some(incoming => incoming.name === outgoingPorts[k].name));
+              console.log('Target Node for ' + outgoingPorts[k].name + ' from ' + nodeDataArray[i].key + ' to ' + targetNode.key + ':', targetNode);
+
+              if (targetNode) {
+                myDiagram.model.addNodeData(nodeDataArray[i]);
+                myDiagram.model.addNodeData(targetNode);
+                linkDataArray.push({
+                  from: nodeDataArray[i].key,
+                  to: targetNode.key,
+                  text: outgoingPorts[k].name,
+                });
+
+                console.log('From ' + nodeDataArray[i].ke + ' to ' + targetNode.ke + ' Connector name: ' + outgoingPorts[k].name);
+              } else {
+                console.warn('Target node is undefined for Connector name: ' + outgoingPorts[k].name);
+              }
+            }
+          }
+        }
+
+        myDiagram.model = new go.GraphLinksModel(
+          nodeDataArray, linkDataArray, [{ fromPort: "r", toPort: "l" }]);
+      } else {
+        console.error('Invalid data structure:', data);
+      }
+      
+    })//then data
+    .catch(error => {
+      window.alert(error.message);
+    });
+  
+  myDiagram.toolManager.clickCreatingTool.archetypeNodeData = {
+		    keyo: "Unit",
+		    //ke: "Unit",
+		    loc: "0 0" // Ensure new nodes have a default location of (0, 0)
+		  };
+
+  myDiagram.addDiagramListener('SelectionDeleting', function (e) {
+    if (e.subject.first() instanceof go.Node) {
+      e.subject.each(function (part) {
+        if (part instanceof go.Node) {
+          var nodeToDeleteData = part.data;
+          var componentName = nodeToDeleteData.key;
+
+          deleteNodeInModel(componentName)
+            .then(response => {
+              console.log('Successfully deleted node:', componentName);
+              console.log('Successfully deleted node:', response);
+
+              reloadPage();
+            })
+            .catch(error => {
+              console.error('Error deleting node:', error);
+            });
+        }
+      });
+    }
+  });//addDiagramListener(SelectionDeleting)
+
+  myDiagram.addDiagramListener('ExternalObjectsDropped', function (e) {
+    e.subject.each(function (part) {
+      if (part instanceof go.Node) {
+        var newNodeData = part.data;
+        var componentName = newNodeData.ke.name;
+
+        postNodeInModel(newNodeData)
+          .then(response => {
+            console.log('Successfully created node:', response);
+            reloadPage();
+          })
+          .catch(error => {
+            console.error('Error creating node:', error);
+          });
+      }
+    });
+  }); //ExternalObjectsDropped
+  
+  
+
+	// Add a "TextEdited" diagram listener to capture the edited text
+	myDiagram.addDiagramListener("TextEdited", (e) => {
+	    const textBlock = e.subject;
+	    const editedText = textBlock.text; // Access the edited text
+	    const node = textBlock.part; // Assuming the text block is part of a node
+	    
+	//check if the node.key is not Unit , otherwise you create a new new		  
+	    if (Number(node.key)>0)  {
+	   	//if (node.key != "Unit")  {    
+	    if (node instanceof go.Node) {
+	    	console.log('checko:', node.key);
+	        // Make an API call to update the model server with the edited text
+	        updateComponentInModel(node.key, editedText)
+			        .then(response => {
+	                    console.log('Successfully updated component:', response);
+	                    reloadPage(); // Reload the page after successful update
+	                })
+	                .catch(error => console.error('Error updating component:', error));
+	    }   
+	    
+	  } 
+	  else{
+			
+		  console.log('check:', node.key);
+	    	//Creating a component;    	
+	    	 // Make an API call to create the new component
+	        createComponentInModel(editedText)
+	            .then(response => {
+	                console.log('Successfully created component:', response);
+					         
+	                // Add the new component to the diagram with an explicit key
+	                myDiagram.model.addNodeData({
+	                 		key: response.name, // Use the name from the response as the key
+	                    // Add other properties as needed
+	                });
+	                
+	                reloadPage(); // Reload the page after successful update
+	                
+	                // Ensure the diagram reflects the changes
+	               // myDiagram.updateTargetBindings();
+	            })
+	            .catch(error => console.error('Error creating component:', error));
+	  
+	  }
+	  
+	});
+
+  
+	  // Function to make an API call to create a new component in your EMF model
+    function createComponentInModel(componentName) {
+        var createEndpoint = 'http://localhost:8080/Architecturemodeling/ArchitectureModel/Component/ArchitectureModel/newElement';
+        var requestData = {
+            name: componentName, // Ensure the key matches the name from your model
+            // Add other attributes as needed
+        };
+
+        return fetch(createEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                console.error('Network response was not ok:', response.status);
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            throw error; // Rethrow the error to propagate it further
+        });
+    }
+//EndCreate New Component
+
+  
+
+  function postNodeInModel(nodeData) {
+    return fetch('http://localhost:8080/Architecturemodeling/Component/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: nodeData.key,
+        positionX: nodeData.loc.split(' ')[0],
+        positionY: nodeData.loc.split(' ')[1],
+        incoming: nodeData.incoming,
+        outgoing: nodeData.outgoing
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.text().then(errorMessage => {
+          throw new Error(errorMessage);
+        });
+      }
+      return response.json();
+    });
+  }//postNodeInModel
+
+//Function to make an API call to update the component in your EMF model
+	function updateComponentInModel(nodeName, newName) {
+	  var updateEndpoint = 'http://localhost:8080/Architecturemodeling/Component/ArchitectureModel/update?attributeName=name&attributeValue=' + encodeURIComponent(nodeName) + '&updatedValue=' + encodeURIComponent(newName);
+	  return fetch(updateEndpoint, {
+	    method: 'PUT',
+	  })
+	    .then(response => {
+	    	//console.log('Raw API Response:', response);
+	        //return response.json();
+	        
+	    	console.log('API call response:', response);
+	        console.log('After API call -> newName:', newName);
+	      if (!response.ok) {
+	        console.error('Network response was not ok:', response.status);
+	        throw new Error('Network response was not ok');
+	      }
+	      return response.json();  // Get the response text instead of JSON
+	    })
+	    .then(responseText => {
+	      // Log the response text received from the server
+	      console.log('Server response text:', responseText);
+
+	      // Attempt to parse JSON (will throw an error if not valid JSON)
+	      return JSON.parse(responseText);
+	    })
+	    .then(jsonData => {
+	      // Log the JSON data received from the server
+	      console.log('Server response JSON:', jsonData);
+	      return jsonData;
+	    })
+	    .catch(error => {
+	      console.error('Error updating component:', error);
+	      throw error; // Rethrow the error to propagate it further
+	    });
+	}//End of Update
+
+
+  function deleteNodeInModel(componentName) {
+    return fetch('http://localhost:8080/Architecturemodeling/Component/delete/${componentName}', {
+      method: 'DELETE',
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.text().then(errorMessage => {
+          throw new Error(errorMessage);
+        });
+      }
+      return response.json();
+    });
+  }//enddeleteNodeInModel
+
+  function reloadPage() {
+    location.reload();
+  }
+</script>
+ 
+ 
+ 
+ 
+ 
+</body>
+</html>

@@ -50,7 +50,8 @@ body {
   		
 				// support double-clicking in the background to add a copy of this data as a node
 			  myDiagram.toolManager.clickCreatingTool.archetypeNodeData = {
-			    key: "Unit"
+			  key: "Unit"
+			    //text: "Unit"
 			  };
 			
 			  // To simplify this code we define a function for creating a context menu button:
@@ -176,6 +177,7 @@ fetch('http://localhost:8080/Architecturemodeling/Component/all')
       // Convert data to GoJS format
       var nodeDataArray = flattenedData.map(function (item) {
         return {
+          //text: item.name,
           key: item.name,
           incoming: item.incoming,
           outgoing: item.outgoing,
@@ -202,7 +204,7 @@ fetch('http://localhost:8080/Architecturemodeling/Component/all')
             var targetNode = nodeDataArray.find(node => node.incoming.some(incoming => incoming.name === outgoingPorts[k].name));
 
             // Log targetNode to check if it's correct
-            console.log('Target Node for ' + outgoingPorts[k].name + ' from ' + nodeDataArray[i].key + ' to ' + targetNode?.key + ':', targetNode);
+            console.log('Target Node for ' + outgoingPorts[k].name + ' from ' + nodeDataArray[i].key1 + ' to ' + targetNode.key + ':', targetNode);
 
             if (targetNode) {
               // Add the original node to the diagram
@@ -520,8 +522,8 @@ fetch('http://localhost:8080/Architecturemodeling/Component/all')
 		    const node = textBlock.part; // Assuming the text block is part of a node
 		    
 		//check if the node.key is not Unit , otherwise you create a new new		  
-		    //if (Number(node.key)>0)  {
-		   if (node.key != "Unit")  {    
+		    if (Number(node.key)>0)  {
+		   	//if (node.key != "Unit")  {    
 		    if (node instanceof go.Node) {
 		    	console.log('checko:', node.key);
 		        // Make an API call to update the model server with the edited text

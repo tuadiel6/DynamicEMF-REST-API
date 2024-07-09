@@ -38,8 +38,9 @@ private final ReflectionService reflectionService;
         this.reflectionService = reflectionService;
     }
 	
+	//*************************** GET Operation ************************
 	
-		// ================Get All the Classes inside a Package ===========
+		// ================Get All the Classes of a Package ===========
 		@Operation(summary = "Get all classes inside a package",
 				description = "Get all classes by specifying its Package name")
 		@GetMapping("/{packageName}")
@@ -52,7 +53,7 @@ private final ReflectionService reflectionService;
 			
 		}
 		
-		//==========Get all methods inside a class======
+		//==========Get all methods of a class======
 		@Operation(summary = "Get all methods inside a class",
 				description = "Get all class methods by speciffying its Package name and Class Name")
 		@GetMapping("/{packageName}/{className}/methods")
@@ -69,11 +70,11 @@ private final ReflectionService reflectionService;
 		
 		
 		
-		// ================GET ALL===========
+			// ================ Get all elements of model(s) that conform to the same metamodel ===========
 				@Operation(summary = "Get all model elements",
 					      description = "Get all model elements by specifying its Package name, Class name and Method name. The response is a list of model elements within the package.")
 				@GetMapping("{packageName}/{className}/all")
-				public ResponseEntity<?>  fetchPubList(
+				public ResponseEntity<?>  fetchModelElement(
 						@Parameter(description = "Insert a package name. e.g.: Example") 
 						@PathVariable String packageName,
 						@Parameter(description = "Insert a class name. e.g.: Family")
@@ -91,42 +92,24 @@ private final ReflectionService reflectionService;
 					
 				}
 		
-			//============================
+			//============= Get only elements of a specific model ===============
 				@Operation(summary = "Get all model elements",
 					      description = "Get all model elements by specifying its Package name, Class name and Method name. The response is a list of model elements within the package.")
-				@GetMapping("{packageName}/{className}/{modelName}/all")
+				@GetMapping("{packageName}/{className}/{xmiFileName}/all")
 				public <T> List<T> fetchItemModel(
 						@Parameter(description = "Insert a package name. e.g.: Example") 
 						@PathVariable String packageName,
 						@Parameter(description = "Insert a class name. e.g.: Family")
 						@PathVariable String className,
-						@Parameter(description = "Insert a model name. e.g.: FamilyModel")
-			            @PathVariable String modelName
+						@Parameter(description = "Insert an xmi file name. e.g.: FamilyModel")
+			            @PathVariable String xmiFileName
 						) throws IllegalArgumentException, InvocationTargetException, ReflectiveOperationException, IOException {
-					return reflectionService.fetchItemModel(packageName,className,modelName);
+					return reflectionService.fetchItemModel(packageName,className,xmiFileName);
 				}
 				
-				//=======================
+			
 		
-		
-		/*
-		
-		// ================GET ALL===========
-		@Operation(summary = "Get all model elements",
-			      description = "Get all model elements by specifying its Package name, Class name and Method name. The response is a list of model elements within the package.")
-		@GetMapping("{packageName}/{className}/all")
-		public <T> List<T> fetchPubList(
-				@Parameter(description = "Insert a package name. e.g.: Example") 
-				@PathVariable String packageName,
-				@Parameter(description = "Insert a class name. e.g.: Family")
-				@PathVariable String className
-				) throws IllegalArgumentException, InvocationTargetException, ReflectiveOperationException, IOException {
-			return reflectionService.fetchItemList(packageName,className);
-		}
-		
-		*/	
-		
-		 //================GET EACH ITEM===========
+		 //================ Get each item from the model ===========
 		@Operation(summary = "Get each item from the model",
 				description = "Get each item by specifying its Package name, Class name and Method name (i.e, reference name)")
 		@GetMapping("{packageName}/{className}/{methodName}")
@@ -139,27 +122,9 @@ private final ReflectionService reflectionService;
 			return reflectionService.fetchEachItem(packageName,className,methodName);
 		}
 		
+			
 		
-		 //================ADD NEW ITEM===========
-		@Operation(summary = "Add a new element to the model",
-				description = "Add new element to the model by specifying its Package name, Class name and the Model name")
-		@PostMapping("{packageName}/{className}/{modelName}/add")
-	    public ResponseEntity<String> addElementToList(
-	    		@Parameter(description = "Insert your package name. e.g.: Example")
-	            @PathVariable String packageName,
-	            @Parameter(description = "Insert a class name. e.g.: Family")
-	            @PathVariable String className,
-	            @Parameter(description = "Insert a model name. e.g.: FamilyModel")
-	            @PathVariable String modelName,
-	            @RequestBody Map<String, Object> requestBody)
-	            throws ReflectiveOperationException, IOException {
-	        reflectionService.addElementToList(packageName, className, modelName, requestBody);
-	        return ResponseEntity.ok("Element added successfully");
-	    }
-		
-		
-		
-		 //================Search Operation===========
+		 //================Filter an element of a specific model base on the key attributes and its corresponding value===========
 		@Operation(summary = "Search an element from a model",
 				description = "Search element from a model by specifying its Package name, Class name and Method name")	
 		@GetMapping("{packageName}/{className}/{methodName}/search")
@@ -177,11 +142,13 @@ private final ReflectionService reflectionService;
 		        throws IllegalArgumentException, InvocationTargetException, ReflectiveOperationException, IOException {
 		    return reflectionService.fetchItemListWithSearch(packageName, className, methodName, attributeName, searchValue);
 		}
+		//****End GET Operation*********
 		
 		
 		
+		//*************************** DELETE Operation ************************
 		
-		// ===========Delete Operation ================
+		// =========== Delete an element that matches to the key attribute and its corresponding value ================
 		@Operation(summary = "Delete an element from a model based on Attribute name and Value. This will delete everything which has has the same attribute and value but within a specific package name",
 					description = "Delete an element from a model based Attribute name and its corresponding value by specifying the Package name, and Class name")
 	    @DeleteMapping("{packageName}/{className}/deleteByAttribute")
@@ -200,13 +167,13 @@ private final ReflectionService reflectionService;
 	        return "Deleted Successfully";
 	    }
 		
-		// ===========Delete Operation by Attribute based on a specific XMI file ================
 		
 		
+			// ===========Delete element on a specific XMI file based on the key attribute and its corresponding value============
 				@Operation(summary = "Delete a specific element from a model based on Attribute name and Value. This will delete a specific element on a specific XMI file name",
 							description = "Delete an element from a model based Attribute name and its corresponding value by specifying the Package name, and Class name. In this example you can delete a complete family or a family member. e.g: Son")
 			    @DeleteMapping("{packageName}/{className}/{xmiFileName}/deleteByAttribute")
-			    public String deleteElementbyAttributeXMI(
+			    public <T> List<T> deleteElementbyAttributeXMI(
 			    		@Parameter(description = "Insert a package name. e.g.: Example")
 			    		 @PathVariable("packageName") String packageName,
 			    		 @Parameter(description = "Insert a class name. e.g.: Daughter or Family (in case you want to delete a complete Family)")
@@ -221,7 +188,7 @@ private final ReflectionService reflectionService;
 															InvocationTargetException, ReflectiveOperationException, IOException
 			    {
 			    	reflectionService.deleteElementbyAttributeXMI(packageName,className,attributeName,attributeValue,xmiFileName);
-			        return "Deleted Successfully";
+			    	return reflectionService.fetchItemModel(packageName,className,xmiFileName);
 			    }
 				
 			/*
@@ -242,7 +209,8 @@ private final ReflectionService reflectionService;
 				    }
 				}
 	*/
-		// ===========Delete by class Operation================
+				
+				// ===========Delete an entire class Operation================
 				@Operation(summary = "Delete an element from a model based on a class name. This will delete every class of the same name of the same package",
 							description = "Delete an element from a model based on class Name by specifying the Package name, and Class name")
 			    @DeleteMapping("{packageName}/{className}/deletebyClass")
@@ -259,11 +227,12 @@ private final ReflectionService reflectionService;
 			    }
 				
 				
-				// ===========Delete by class with a specific xmi Operation================
+				
+				// =========== Delete an entire class on a specific xmi file ================
 				@Operation(summary = "Delete an element from a model based on Class name on specified XMI file name. This will delete a class based on a specific XMI file",
 							description = "Delete an element from a model based on Class name for a specific XMI file name by passing the Package name, and Class name and the target XMI file name")
 			    @DeleteMapping("{packageName}/{className}/{xmiFileName}/deleteClassByXMI")
-			    public String deleteClassNameBasedXMI(
+			    public <T> List<T> deleteClassNameBasedXMI(
 			    		@Parameter(description = "Insert a package name. e.g.: Example")
 			    		 @PathVariable("packageName") String packageName,
 			    		 @Parameter(description = "Insert a class name. e.g.: Son")
@@ -274,14 +243,20 @@ private final ReflectionService reflectionService;
 															InvocationTargetException, ReflectiveOperationException, IOException
 			    {
 			    	reflectionService.deleteClassNameBasedXMI(packageName,className, xmiFileName);
-			        return "Deleted Successfully";
+			        //return "Deleted Successfully";
+			    	return reflectionService.fetchItemModel(packageName,className,xmiFileName);
 			    }	
 				
-				// ===========PUT based on attribute name and value with a specific xmi Operation================
+				//***End DELETE Operation********************
+				
+				
+				//*************************** UPDATE Operation ************************
+				
+				// =========== Update an element  in a specific XMI file based on attribute and its corresponding value ================
 				@Operation(summary = "Update an element from a model based on Class name and a specific XMI file name",
 						description = "Update an element from a model based on Class name for a specific XMI file name by passing the Package name, and Class name and the target XMI file name")
 				@PutMapping("/{packageName}/{className}/{xmiFileName}/update")
-				public String updateElement(
+				public <T> List<T> updateElement(
 						@Parameter(description = "Insert a package name. e.g.: Example")
 				        @PathVariable("packageName") String packageName,
 				        @Parameter(description = "Insert a class name. e.g.: Son")
@@ -297,11 +272,34 @@ private final ReflectionService reflectionService;
 						
 				        throws ReflectiveOperationException, FileNotFoundException {
 				    reflectionService.updateElement(packageName, className, xmiFileName, attributeName, attributeValue, updatedValue);
-				    return "Updated Successfully";
+				   
+				    return reflectionService.fetchItemModel(packageName,className,xmiFileName);
 				}
+				//***End UPDATE Operation ********
+				
+				
+				//*************************** POST Operation ************************
+				
+				//================ADD NEW ITEM TO A MODEL===========
+				@Operation(summary = "Add a new element to the model",
+						description = "Add new element to the model by specifying its Package name, Class name and the Model name")
+				@PostMapping("{packageName}/{className}/{modelName}/add")
+			    public ResponseEntity<String> addElementToList(
+			    		@Parameter(description = "Insert your package name. e.g.: Example")
+			            @PathVariable String packageName,
+			            @Parameter(description = "Insert a class name. e.g.: Family")
+			            @PathVariable String className,
+			            @Parameter(description = "Insert a model name. e.g.: FamilyModel")
+			            @PathVariable String modelName,
+			            @RequestBody Map<String, Object> requestBody)
+			            throws ReflectiveOperationException, IOException {
+			        reflectionService.addElementToList(packageName, className, modelName, requestBody);
+			        return ResponseEntity.ok("Element added successfully");
+			    }
 
 			
-				// ===========POST or ADD AN ELEMENT TO THE EXISTING ELEMENTS ON A specific xmi FILE===
+				
+				// =========== Add an item to the existing elements on a specific xmi file===
 				@Operation(summary = "Add an new element to a model on specific XMI file name through the specification of where to attach the new element.",
 						description = "Add a new element to a model on a specific XMI file name by specifying where to add the new element. Here we pass the Package name, Parent class name and the target XMI file name, Child Class name, etc")
 				@PostMapping("/{packageName}/{parentClassName}/{xmiFileName}/addExisting")
@@ -329,12 +327,13 @@ private final ReflectionService reflectionService;
 				    return "Element Added Successfully";
 				}
 								
-		
-				 //================ADD OR CREATE A NEW INSTANCE===========
+				
+				
+				 //================Add a new instance to a model on a specific xmi file===========
 				@Operation(summary = "Add a new instance to the model",
 						description = "Add new element to the model by specifying its Package name, Class name and the Parent class name and specify the xmi file where to attach the newly created instance")
 				@PostMapping("/{packageName}/{parentClassName}/{childClassName}/{xmiFileName}/newElement")
-			    public ResponseEntity<String> addNewElement(
+			    public <T> List<T> addNewElement(
 			    		@Parameter(description = "Insert your package name. e.g.: Example")
 			            @PathVariable String packageName,
 			            @Parameter(description = "Insert a parent class name . e.g.: FamilyModel")
@@ -346,17 +345,17 @@ private final ReflectionService reflectionService;
 			            @RequestBody Map<String, Object> requestBody)
 			            throws ReflectiveOperationException, IOException {
 			        reflectionService.addNewElement(packageName, parentClassName, childClassName, xmiFileName, requestBody);
-			        return ResponseEntity.ok("Element added successfully");
+			        return reflectionService.fetchItemModel(packageName,parentClassName,xmiFileName);
 			    }
-
+			    
+			    		
 				
+				//============Add a new instance to a model by setting the references (e.g., in the scenario of bidirectional relationship)===========
 				
-				//======================test===========
-				
-				@Operation(summary = "Add a new instance to the model",
+				@Operation(summary = "Add a new instance to a model",
 						description = "Add new element to the model by specifying its Package name, Class name and the Parent class name and specify the xmi file where to attach the newly created instance")
 				@PostMapping("/{packageName}/{parentClassName}/{childClassName}/{xmiFileName}/newEopposite")
-			    public ResponseEntity<String> addNewEopposite(
+			    public <T> List<T> addNewEopposite(
 			    		@Parameter(description = "Insert your package name. e.g.: Example")
 			            @PathVariable String packageName,
 			            @Parameter(description = "Insert a parent class name . e.g.: FamilyModel")
@@ -370,7 +369,8 @@ private final ReflectionService reflectionService;
 			            throws ReflectiveOperationException, IOException {
 			        reflectionService.addNewEopposite(packageName, parentClassName, childClassName, xmiFileName, fieldType, requestBody);
 			       
-			        return ResponseEntity.ok("Element added successfully");
+			        return reflectionService.fetchItemModel(packageName,parentClassName,xmiFileName);
 			    }
+				//***End POST Operation *******
 				
 }

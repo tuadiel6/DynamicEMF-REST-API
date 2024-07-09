@@ -65,7 +65,7 @@ public class ReflectionService {
 	 * The method returns a Set<Class> containing all the classes found in the specified package.
 	 */
 	
-	// ==================GET All CLASSES INSIDE A PACKAGE===================
+	// ==================GET All CLASSES OF A PACKAGE===================
 	public List<Class<?>> findAllClasses(String packageName) throws ReflectiveOperationException {
         Reflections reflections = new Reflections(packageName, new SubTypesScanner(false));
         
@@ -78,7 +78,7 @@ public class ReflectionService {
         //return reflections.getSubTypesOf(Object.class);
     }
 	
-	// ==================GET All METHOD INSIDE A CLASS ===================
+	// ==================GET All METHOD OF A CLASS ===================
 	public static List<Method> findAllMethods(String packageName, String className) throws ClassNotFoundException {
 		
 		Class<?> clazz = Class.forName(packageName + "." + className);
@@ -125,7 +125,7 @@ public class ReflectionService {
     }
 	
 	
-	 // ==================GET All FOR A SPECIFIC MODEL===================
+	 // ==================GET ONLY ELEMENTS OF A SPECIFIC MODEL===================
     /*
      * Performs a "GET" operation on a specific model using reflection.
      */
@@ -159,7 +159,7 @@ public class ReflectionService {
 	
 	
 	
-	// ==================GET EACH ELEMENT OPERATION===================
+	// ==================GET EACH ITEM FROM THE MODEL===================
     /*
      * Performs a "GET" operation on a model using reflection.
      */
@@ -334,7 +334,7 @@ public class ReflectionService {
 	}
 
 	
-	// ==================SEARCH OPERATION===================
+	// ==================SEARCH OR FILTER AN ELEMENT OF A SPECIFIC MODEL BASED ON THE KEY ATTRIBUTE AND ITS CORRESPONDING VALUE ===================
 	
 	public <T> List<T> fetchItemListWithSearch(String packageName, String className, String methodName, String attributeName, String searchValue)
 	        throws ReflectiveOperationException, IllegalArgumentException, InvocationTargetException, FileNotFoundException {
@@ -486,7 +486,7 @@ public class ReflectionService {
 	 	  }  
 	 	  	 	  
 	 	 
-	 	  //===================DELETE ELEMENTS BASED ON ATTRIBUTE AND VALUE ====================
+	 	  //===================DELETE AN ELEMENT THAT MATCHES WITH THE KEY ATTRIBUTE AND ITS CORRESPONDING VALUE ====================
 	 	 
 	 	 public void deleteElementbyAttribute(String packageName, String className, String attributeName, Object attributeValue)
 	 	        throws ReflectiveOperationException, FileNotFoundException {
@@ -556,7 +556,7 @@ public class ReflectionService {
 	 	}
 
 	 	 
-//===================DELETE ELEMENTS BASED ON ATTRIBUTE AND VALUE ON A SPECIFIC XMI FILE ====================
+//===================DELETE ELEMENTS ON A SPECIFIC XMI FILE BASED ON KEY ATTRIBUTE AND ITS CORRESPONDING VALUE ====================
 	 	 
 	 	 public void deleteElementbyAttributeXMI(String packageName, String className, String attributeName, Object attributeValue, String xmiFileName)
 	 	        throws ReflectiveOperationException, FileNotFoundException {
@@ -619,7 +619,7 @@ public class ReflectionService {
 	 	}
 
 	 	 	  
-	 	  //======================DELETE ELEMENT BY CLASS NAME================
+	 	  //======================DELETE AN ENTIRE CLASS================
 	 	public void deleteElementsByClassName(String packageName, String className)
 	 	        throws ReflectiveOperationException, IOException {
 
@@ -660,7 +660,7 @@ public class ReflectionService {
 	 	
 	 	
 	 	
-	 	//==============DELETE ELEMENTS BY CLASS NAME ON A SPECIFIC XMI FILE=================
+	 	//============== DELETE AN ENTIRE CLASS ON A SPECIFIC XMI FILE =================
 	 	
 	 	public void deleteClassNameBasedXMI(String packageName, String className, String xmiFileName)
 	 	        throws ReflectiveOperationException, IOException {
@@ -711,7 +711,7 @@ public class ReflectionService {
 	 	}
 
 
-	 	//==============UPDATE ELEMENT BY CLASS NAME BASED ON ATTRIBUTE AND VALUE ON A SPECIFIC XMI FILE=================
+	 	//==============UPDATE ELEMENT ON A SPECIFIC XMI FILE BASED ON ATTRIBUTE AND ITS CORRESPONDING VALUE =================
 	 	public void updateElement(String packageName, String className, String xmiFileName, String attributeName,
 	 	        String attributeValue, Object updatedValue)
 	 	        throws ReflectiveOperationException, FileNotFoundException {
@@ -760,7 +760,7 @@ public class ReflectionService {
 	 	}
 
 	 	
-	 	//===========POST NEW ELEMENT TO THE EXISTING ELEMENTS ============================
+	 	//===========ADD AN ITEM TO THE EXISTING ELEMENTS ON A SPECIFIC XMI FILE ============================
 	 	
 	 	public <T> void addElement(String packageName, String parentClassName, Map<String, Object> attributes,
                 String parentContainmentName, String attributeNameToMatch, Object attributeValueToMatch,String childClassName,
@@ -927,7 +927,7 @@ public class ReflectionService {
 							field.setAccessible(true);
 																	
 								if (!field.getType().getSimpleName().equalsIgnoreCase("String")) {
-									System.err.println("Field Type============" + field.getType().getSimpleName() + " -----------" + field.getName());
+									//System.err.println("Field Type============" + field.getType().getSimpleName() + " -----------" + field.getName());
 																			
 									List<Object> itemList = fetchItemList(packageName, field.getType().getSimpleName());
 									List<Field> allFields = getAllFields(createdObject.getClass());
@@ -937,7 +937,7 @@ public class ReflectionService {
 										for (Field f : allFields) {
 											if (f.getName().equalsIgnoreCase("name")) {
 												 nameField = f;
-												 System.err.println(":::::nameField:::: " +nameField);
+												 //System.err.println(":::::nameField:::: " +nameField);
 												 nameField.setAccessible(true);
 														}
 															}
@@ -946,7 +946,7 @@ public class ReflectionService {
 																			
 													for (Object item : itemList) {
 														if (nameField.get(item).equals(attributeValue)) {
-															System.err.println(":===Try:======== " + item);
+															//System.err.println(":===Try:======== " + item);
 															nameField.setAccessible(true);
 																					          
 															//Component component = (Component) item;
@@ -958,7 +958,7 @@ public class ReflectionService {
 																}
 														if (!matchFound) {
 															System.err.println("Matching object not found for attribute: " + attributeValue);
-																			      // Handle the missing match appropriately
+															
 																}
 															} 
 														else {
@@ -967,7 +967,7 @@ public class ReflectionService {
 																field.set(createdObject, attributeValue);
 																} else {
 																	System.err.println("Type mismatch for field: " + attributeName);
-																			      // Handle the mismatch appropriately
+																			      
 																	}
 																}
 															}
@@ -1000,7 +1000,7 @@ public class ReflectionService {
 		 	}
 		 	
 		 	
-		 	//======Get Fields=========
+		 	//======Get all Fields=========
 						
 			private Field getField(Class<?> clazz, String fieldName) {
 					try {
@@ -1016,8 +1016,8 @@ public class ReflectionService {
 						}
 
 
-//==========
-
+		//========== ADD A NEW INSTANCE TO A MODEL BY SETTING THE REFERENCES (e.g., in the scenario of bidirectional relationship) ========
+      
 		public List<EObject> addNewEopposite(String packageName, String parentClassName, String childClassName, 
 				String xmiFileName, String fieldType, Map<String, Object> requestBody)
 					            throws ReflectiveOperationException, IOException {
@@ -1042,8 +1042,9 @@ public class ReflectionService {
 						// EReference containmentReference = findContainmentReference1(parentElement, newInstance.eClass().getName());
 					EReference containmentReference = findContainmentReference1(parentElement, newInstance);
 					        
-					System.out.println("parentsyyyyyyyyyyyyyyyyyyyyyyyy"+parentElement);
-					System.out.println("Containmenent referenceyyyyyyyyyyy"+containmentReference);
+					//System.out.println("parents:"+parentElement);
+					//System.out.println("Containmenent reference"+containmentReference);
+					
 					// Add the new instance to the containment reference of the parent element
 					if (parentElement != null && containmentReference != null) {
 					   if (containmentReference.isMany()) {
@@ -1078,7 +1079,7 @@ public class ReflectionService {
 		 	
 		 	
 	 	
-	 	//==========ADD A NEW INSTANCE TO THE MODEL===============
+	 	//========== ADD A NEW INSTANCE TO THE MODEL ON A SPECIFIC XMI FILE ===============
 	 	
 	 	public List<EObject> addNewElement(String packageName, String parentClassName, String childClassName, String xmiFileName, Map<String, Object> requestBody)
 	            throws ReflectiveOperationException, IOException {
