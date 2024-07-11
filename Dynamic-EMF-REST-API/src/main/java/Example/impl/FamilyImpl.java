@@ -25,6 +25,7 @@ import org.eclipse.emf.ecore.util.EObjectContainmentWithInverseEList;
 import org.eclipse.emf.ecore.util.InternalEList;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
@@ -44,7 +45,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
  *
  * @generated
  */
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "name")
+//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "name")
 public class FamilyImpl extends MinimalEObjectImpl.Container implements Family {
 	/**
 	 * The cached value of the '{@link #getParents() <em>Parents</em>}' containment reference list.
@@ -140,6 +141,7 @@ public class FamilyImpl extends MinimalEObjectImpl.Container implements Family {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@JsonManagedReference
 	public EList<Parent> getParents() {
 		if (parents == null) {
 			parents = new EObjectContainmentWithInverseEList<Parent>(Parent.class, this, ExamplePackage.FAMILY__PARENTS, ExamplePackage.PARENT__FAMILY);
@@ -152,6 +154,7 @@ public class FamilyImpl extends MinimalEObjectImpl.Container implements Family {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@JsonManagedReference
 	public EList<Son> getSons() {
 		if (sons == null) {
 			sons = new EObjectContainmentWithInverseEList<Son>(Son.class, this, ExamplePackage.FAMILY__SONS, ExamplePackage.SON__FAMILY);
@@ -164,6 +167,7 @@ public class FamilyImpl extends MinimalEObjectImpl.Container implements Family {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@JsonManagedReference
 	public EList<Daughter> getDaughters() {
 		if (daughters == null) {
 			daughters = new EObjectContainmentWithInverseEList<Daughter>(Daughter.class, this, ExamplePackage.FAMILY__DAUGHTERS, ExamplePackage.DAUGHTER__FAMILY);

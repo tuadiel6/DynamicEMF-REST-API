@@ -20,6 +20,8 @@ import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 import org.eclipse.emf.ecore.util.EObjectContainmentEList;
 import org.eclipse.emf.ecore.util.InternalEList;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 /**
  * <!-- begin-user-doc -->
  * An implementation of the model object '<em><b>Family Model</b></em>'.
@@ -68,6 +70,7 @@ public class FamilyModelImpl extends MinimalEObjectImpl.Container implements Fam
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@JsonManagedReference
 	public EList<Family> getFamilys() {
 		if (familys == null) {
 			familys = new EObjectContainmentEList<Family>(Family.class, this, ExamplePackage.FAMILY_MODEL__FAMILYS);

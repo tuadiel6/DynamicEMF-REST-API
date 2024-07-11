@@ -17,6 +17,7 @@ import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
@@ -35,7 +36,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
  *
  * @generated
  */
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "firstName")
+//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "firstName")
 public class DaughterImpl extends MinimalEObjectImpl.Container implements Daughter {
 	/**
 	 * The default value of the '{@link #getFirstName() <em>First Name</em>}' attribute.
@@ -101,6 +102,7 @@ public class DaughterImpl extends MinimalEObjectImpl.Container implements Daught
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@JsonBackReference
 	public Family getFamily() {
 		if (eContainerFeatureID() != ExamplePackage.DAUGHTER__FAMILY) return null;
 		return (Family)eInternalContainer();
